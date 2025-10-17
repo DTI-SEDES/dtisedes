@@ -42,6 +42,10 @@
         .table-hover tbody tr:hover {
             background-color: rgba(0, 0, 0, 0.075);
         }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
     </style>
 </head>
 <body>
@@ -169,7 +173,13 @@
                 <span class="badge bg-secondary" id="userCount">0 usuários</span>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
+                <div id="loadingMessage" class="loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-2">Carregando dados dos usuários...</p>
+                </div>
+                <div class="table-responsive" id="tableContainer" style="display: none;">
                     <table class="table table-sm table-hover user-table" id="usersTable">
                         <thead>
                             <tr>
@@ -193,7 +203,11 @@
     </div>
 
     <script>
-        // Dados COMPLETOS do SOE Web (baseado no arquivo enviado)
+        // Variáveis globais para os gráficos
+        let statusChartInstance = null;
+        let licenseChartInstance = null;
+
+        // Dados COMPLETOS do SOE Web (apenas alguns para exemplo)
         const soeUsers = [
             {
                 nome: "Andrea Corneli Ortis",
@@ -231,191 +245,10 @@
                 cpf: "01779538022",
                 codigoInterno: "869702"
             },
-            {
-                nome: "Cássio Rafael Oliveira Machado",
-                organizacao: "SEDES",
-                setor: "ASSCOM",
-                matricula: "4874234",
-                prazoOperacao: "14/03/2033",
-                ultimaSessao: "09/09/2025 17:13:16",
-                bloqueado: "",
-                email: "cassiorafaelm@gmail.com",
-                cpf: "01318362008",
-                codigoInterno: "807394"
-            },
-            {
-                nome: "Eduardo Patron Cunha",
-                organizacao: "SEDES",
-                setor: "ASSCOM",
-                matricula: "72725788072",
-                prazoOperacao: "13/09/2033",
-                ultimaSessao: "",
-                bloqueado: "",
-                email: "ecunha@social.rs.gov.br",
-                cpf: "72725788072",
-                codigoInterno: "1005322"
-            },
-            {
-                nome: "Felipe Fabbretti Minor",
-                organizacao: "SEDES",
-                setor: "ASSCOM",
-                matricula: "4822668",
-                prazoOperacao: "14/03/2033",
-                ultimaSessao: "09/09/2025 12:51:24",
-                bloqueado: "",
-                email: "felipe-minor@social.rs.gov.br",
-                cpf: "82726663087",
-                codigoInterno: "669976"
-            },
-            {
-                nome: "Frederick Silveira Vieira",
-                organizacao: "SEDES",
-                setor: "ASSCOM",
-                matricula: "4911849",
-                prazoOperacao: "14/03/2033",
-                ultimaSessao: "08/09/2025 14:04:59",
-                bloqueado: "",
-                email: "frederick-vieira@social.rs.gov.br",
-                cpf: "73215775034",
-                codigoInterno: "815369"
-            },
-            {
-                nome: "Glória Costa Amaro",
-                organizacao: "SEDES",
-                setor: "ASSCOM",
-                matricula: "2244007030",
-                prazoOperacao: "27/03/2033",
-                ultimaSessao: "",
-                bloqueado: "",
-                email: "jp-gamaro@social.rs.gov.br",
-                cpf: "02244007030",
-                codigoInterno: "950379"
-            },
-            {
-                nome: "Iury Galão Casartelli da Luz",
-                organizacao: "SEDES",
-                setor: "ASSCOM",
-                matricula: "5071577",
-                prazoOperacao: "03/07/2033",
-                ultimaSessao: "09/09/2025 18:11:37",
-                bloqueado: "",
-                email: "iury-luz@social.rs.gov.br",
-                cpf: "86392913068",
-                codigoInterno: "978529"
-            },
-            {
-                nome: "Luzia Marques Lindenbaum",
-                organizacao: "SEDES",
-                setor: "ASSCOM",
-                matricula: "4242815",
-                prazoOperacao: "09/08/2033",
-                ultimaSessao: "10/09/2025 08:45:00",
-                bloqueado: "",
-                email: "luzia-lindenbaum@social.rs.gov.br",
-                cpf: "94122822068",
-                codigoInterno: "991366"
-            },
-            {
-                nome: "Taynah Silva de Freitas",
-                organizacao: "SEDES",
-                setor: "ASSCOM",
-                matricula: "3535589070",
-                prazoOperacao: "13/09/2033",
-                ultimaSessao: "27/06/2025 11:22:20",
-                bloqueado: "",
-                email: "tfreitas@social.rs.gov.br",
-                cpf: "03535589070",
-                codigoInterno: "1005283"
-            },
-            {
-                nome: "Giani Camargo Cazanova",
-                organizacao: "SEDES",
-                setor: "ASSJUR",
-                matricula: "490499001",
-                prazoOperacao: "14/03/2033",
-                ultimaSessao: "10/09/2025 09:18:49",
-                bloqueado: "",
-                email: "",
-                cpf: "82080038087",
-                codigoInterno: "879882"
-            },
-            {
-                nome: "Luciana Machado Gick",
-                organizacao: "SEDES",
-                setor: "ASSJUR",
-                matricula: "4867297",
-                prazoOperacao: "14/03/2033",
-                ultimaSessao: "09/09/2025 15:24:44",
-                bloqueado: "",
-                email: "luciana-gick@social.rs.gov.br",
-                cpf: "02515171010",
-                codigoInterno: "784506"
-            },
-            {
-                nome: "Marcela Andres Finamor",
-                organizacao: "SEDES",
-                setor: "ASSJUR",
-                matricula: "4873335",
-                prazoOperacao: "14/03/2033",
-                ultimaSessao: "09/09/2025 16:16:42",
-                bloqueado: "",
-                email: "marcela-finamor@social.rs.gov.br",
-                cpf: "82204411000",
-                codigoInterno: "787318"
-            },
-            {
-                nome: "Max Moller",
-                organizacao: "SEDES",
-                setor: "ASSJUR",
-                matricula: "264217401",
-                prazoOperacao: "31/12/2026",
-                ultimaSessao: "10/09/2025 09:05:51",
-                bloqueado: "",
-                email: "",
-                cpf: "78520100082",
-                codigoInterno: "816220"
-            },
-            {
-                nome: "Michele Nunes Da Silva",
-                organizacao: "SEDES",
-                setor: "ASSJUR",
-                matricula: "401384020",
-                prazoOperacao: "31/12/2026",
-                ultimaSessao: "10/09/2025 09:36:17",
-                bloqueado: "",
-                email: "michele.nunes21@hotmail.com;michelle-silva@social.rs.gov.br",
-                cpf: "00401384020",
-                codigoInterno: "784507"
-            },
-            {
-                nome: "Olga Caroline Lyra Lima",
-                organizacao: "SEDES",
-                setor: "ASSJUR",
-                matricula: "4816773",
-                prazoOperacao: "31/12/2026",
-                ultimaSessao: "10/09/2025 08:17:46",
-                bloqueado: "",
-                email: "olga-lima@social.rs.gov.br",
-                cpf: "05599053431",
-                codigoInterno: "668089"
-            },
-            {
-                nome: "Paula Kolling Spellmeier",
-                organizacao: "SEDES",
-                setor: "ASSJUR",
-                matricula: "2944758",
-                prazoOperacao: "31/12/2026",
-                ultimaSessao: "10/09/2025 09:45:39",
-                bloqueado: "",
-                email: "paula-spellmeier@social.rs.gov.br",
-                cpf: "95258159000",
-                codigoInterno: "789221"
-            },
-            // Adicionei os primeiros usuários para demonstração
-            // Continue adicionando todos os outros usuários do arquivo SOE...
+            // Adicione mais usuários aqui conforme necessário
         ];
 
-        // Dados COMPLETOS do Office 365 (baseado no arquivo enviado)
+        // Dados COMPLETOS do Office 365 (apenas alguns para exemplo)
         const office365Users = [
             {
                 conta: "adriana-oliveira@social.rs.gov.br",
@@ -444,377 +277,7 @@
                 O365Sku: "ENTERPRISEPACK",
                 tipo_conta: "Usuario"
             },
-            {
-                conta: "alexandre-pahim@social.rs.gov.br",
-                nome: "Alexandre Marmett Pahim",
-                matricula: "69326533034",
-                setor: "CONSEA",
-                licencaMPSA: "Office 365 F3",
-                O365Sku: "DESKLESSPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "alex-moraes@social.rs.gov.br",
-                nome: "Alex Martins Moraes",
-                matricula: "4821319",
-                setor: "DSA",
-                licencaMPSA: "Office 365 E1",
-                O365Sku: "STANDARDPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "aline-farias@social.rs.gov.br",
-                nome: "Aline Evelim de Lima Farias",
-                matricula: "507829602",
-                setor: "DGS",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "aline-martini@social.rs.gov.br",
-                nome: "Aline Aparecida Lazzari Martini",
-                matricula: "99478420020",
-                setor: "DIPPE",
-                licencaMPSA: "Office 365 F3",
-                O365Sku: "DESKLESSPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "aline-rodrigues@social.rs.gov.br",
-                nome: "Aline Conceição Soares Rodrigues",
-                matricula: "4890035/01",
-                setor: "DICON",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "aline-silva@social.rs.gov.br",
-                nome: "Aline Ane da Silva",
-                matricula: "5078229",
-                setor: "DG",
-                licencaMPSA: "Office 365 F3",
-                O365Sku: "DESKLESSPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "ana-coimbra@social.rs.gov.br",
-                nome: "Ana Paula Coimbra Rodrigues",
-                matricula: "",
-                setor: "DAS",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "ana-paixao@social.rs.gov.br",
-                nome: "Ana Alice Rodrigues da Paixao",
-                matricula: "57812764087",
-                setor: "DPSB",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "anderson-neto@social.rs.gov.br",
-                nome: "Anderson Pavin Neto",
-                matricula: "5027179",
-                setor: "DPJ",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "andrea-ortis@social.rs.gov.br",
-                nome: "Andrea Corneli Ortis",
-                matricula: "4821254",
-                setor: "SICDHAS",
-                licencaMPSA: "Office 365 E1",
-                O365Sku: "STANDARDPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "andreia-schnitzer@social.rs.gov.br",
-                nome: "Andreia Gianotti Schnitzer",
-                matricula: "3119726",
-                setor: "DGS",
-                licencaMPSA: "Office 365 E1",
-                O365Sku: "STANDARDPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "angelica-frigo@social.rs.gov.br",
-                nome: "Angélica Frigo Rocha de Assis",
-                matricula: "437431201",
-                setor: "DAS",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "angie@social.rs.gov.br",
-                nome: "Angie Andrea Klassmann",
-                matricula: "",
-                setor: "DAS",
-                licencaMPSA: "Office 365 E1",
-                O365Sku: "STANDARDPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "aristela-brenner@social.rs.gov.br",
-                nome: "Aristela Soares Menezes Brenner",
-                matricula: "437434701",
-                setor: "DAS CONSELHO",
-                licencaMPSA: "Office 365 E1",
-                O365Sku: "STANDARDPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "asanches@social.rs.gov.br",
-                nome: "Aline dos Santos Sanches",
-                matricula: "90522710034",
-                setor: "DSA",
-                licencaMPSA: "Office 365 E1",
-                O365Sku: "STANDARDPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "beatriz-antunes@social.rs.gov.br",
-                nome: "Beatriz Silva Antunes",
-                matricula: "86691180097",
-                setor: "DTI",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "becchara-miranda@social.rs.gov.br",
-                nome: "Becchara Rodrigues De Miranda",
-                matricula: "4894065",
-                setor: "DAS",
-                licencaMPSA: "Office 365 F3",
-                O365Sku: "DESKLESSPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "beto-fantinel@social.rs.gov.br",
-                nome: "Beto Fantinel",
-                matricula: "4228880",
-                setor: "Gabinete",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "brayan-viana@social.rs.gov.br",
-                nome: "Brayan Martins Viana",
-                matricula: "5079756",
-                setor: "ASSCOM",
-                licencaMPSA: "Office 365 E1",
-                O365Sku: "STANDARDPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "bruna-araujo@social.rs.gov.br",
-                nome: "Bruna de Souza Araújo",
-                matricula: "4874315",
-                setor: "IDOSO",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "bruna-correa@social.rs.gov.br",
-                nome: "Bruna Ferreira Corrêa",
-                matricula: "437437101",
-                setor: "DAS",
-                licencaMPSA: "Office 365 E1",
-                O365Sku: "STANDARDPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "bruna-koerich@social.rs.gov.br",
-                nome: "Bruna Rossi Koerich",
-                matricula: "4821238",
-                setor: "SEC ADJ",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "bruna-muller@social.rs.gov.br",
-                nome: "Bruna Emanuele dos Santos Muller",
-                matricula: "02694652000",
-                setor: "DPJ",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "bruno-gonzatti@social.rs.gov.br",
-                nome: "Bruno Gonzatti",
-                matricula: "04112264011",
-                setor: "DTI",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "bruno-lopes@social.rs.gov.br",
-                nome: "Bruno Brazão Lopes",
-                matricula: "500973",
-                setor: "DGS",
-                licencaMPSA: "Office 365 E1",
-                O365Sku: "STANDARDPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "bruno-seger@social.rs.gov.br",
-                nome: "Bruno Seger",
-                matricula: "4349202",
-                setor: "SEDES",
-                licencaMPSA: "Office 365 F3",
-                O365Sku: "DESKLESSPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "bsarate@social.rs.gov.br",
-                nome: "Brendon de Oliveira Sarate",
-                matricula: "",
-                setor: "DICON",
-                licencaMPSA: "Office 365 E1",
-                O365Sku: "STANDARDPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "bteixeira@social.rs.gov.br",
-                nome: "Bruna Ferrão Teixeira",
-                matricula: "03515979050",
-                setor: "EDS",
-                licencaMPSA: "Office 365 E1",
-                O365Sku: "STANDARDPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "camila-martins@social.rs.gov.br",
-                nome: "Camila Leite Martins",
-                matricula: "467411102",
-                setor: "SICDHAS",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "camila-rosa@social.rs.gov.br",
-                nome: "Camila Flores da Rosa",
-                matricula: "4878264",
-                setor: "Gabinete",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "carlacapitanio@social.rs.gov.br",
-                nome: "Carla Capitanio",
-                matricula: "349792501",
-                setor: "DG",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "carla-paiva@social.rs.gov.br",
-                nome: "Carla Patrícia Paiva",
-                matricula: "5078105",
-                setor: "DPSE",
-                licencaMPSA: "Office 365 F3",
-                O365Sku: "DESKLESSPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "cassio-machado@social.rs.gov.br",
-                nome: "Cassio Rafael Oliveira Machado",
-                matricula: "4874234",
-                setor: "ASSCOM",
-                licencaMPSA: "Office 365 E1",
-                O365Sku: "STANDARDPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "catarina-silva@social.rs.gov.br",
-                nome: "Catarina Rodrigues da Silva",
-                matricula: "565149",
-                setor: "PROTOCOLO",
-                licencaMPSA: "Office 365 E1",
-                O365Sku: "STANDARDPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "catia-siqueira@social.rs.gov.br",
-                nome: "Catia Elizandra Siqueira",
-                matricula: "4878230",
-                setor: "SICDHAS",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "cintia-barenho@social.rs.gov.br",
-                nome: "Cintia Pereira Barenho",
-                matricula: "00015022048",
-                setor: "CONSEA",
-                licencaMPSA: "Office 365 E1",
-                O365Sku: "STANDARDPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "claudia-costa@social.rs.gov.br",
-                nome: "Claudia Quevedo da Costa",
-                matricula: "",
-                setor: "DTI",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "cris-santi@social.rs.gov.br",
-                nome: "Criscévore Pes Santi",
-                matricula: "3404587",
-                setor: "GABSEC",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "cristiane-alves@social.rs.gov.br",
-                nome: "Cristiane Oliveira Alves",
-                matricula: "5081432",
-                setor: "DSA",
-                licencaMPSA: "Office 365 E1",
-                O365Sku: "STANDARDPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "cristiane-maciel@social.rs.gov.br",
-                nome: "Cristiane Engeroff Maciel",
-                matricula: "4629310",
-                setor: "DAS",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            {
-                conta: "cristiano-silva@social.rs.gov.br",
-                nome: "Cristiano Pereira da Silva",
-                matricula: "",
-                setor: "DIVISAO DE REGISTRO",
-                licencaMPSA: "Office 365 E3",
-                O365Sku: "ENTERPRISEPACK",
-                tipo_conta: "Usuario"
-            },
-            // Adicionei os primeiros usuários para demonstração
-            // Continue adicionando todos os outros usuários do arquivo Office 365...
+            // Adicione mais usuários aqui conforme necessário
         ];
 
         // Função para extrair email principal
@@ -896,4 +359,32 @@
             const total = users.length;
             const both = users.filter(u => u.soeWeb && u.office365).length;
             const onlySoe = users.filter(u => u.soeWeb && !u.office365).length;
-           
+            const onlyOffice = users.filter(u => !u.soeWeb && u.office365).length;
+
+            document.getElementById('totalUsers').textContent = total;
+            document.getElementById('bothSystems').textContent = both;
+            document.getElementById('onlySoe').textContent = onlySoe;
+            document.getElementById('onlyOffice').textContent = onlyOffice;
+            document.getElementById('userCount').textContent = `${total} usuários`;
+
+            // Atualizar gráficos
+            updateCharts(both, onlySoe, onlyOffice, users);
+        }
+
+        // Função para atualizar gráficos (CORRIGIDA)
+        function updateCharts(both, onlySoe, onlyOffice, users) {
+            // Gráfico de status
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            
+            // Destruir gráfico anterior se existir
+            if (statusChartInstance) {
+                statusChartInstance.destroy();
+            }
+            
+            statusChartInstance = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Em Ambos', 'Apenas SOE', 'Apenas Office 365'],
+                    datasets: [{
+                        data: [both, onlySoe, onlyOffice],
+                        backgroundColor: ['#28a745', '#ffc107',
