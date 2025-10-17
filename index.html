@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Gerenciamento de Usuários</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .card {
+            transition: transform 0.2s;
+            margin-bottom: 1rem;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .status-badge {
+            font-size: 0.75rem;
+        }
+        .user-table {
+            font-size: 0.875rem;
+        }
+        .alert-attention {
+            border-left: 4px solid #dc3545;
+        }
+        .filter-section {
+            background-color: #f8f9fa;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .stats-card {
+            text-align: center;
+            padding: 1rem;
+        }
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <!-- Cabeçalho -->
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-users me-2"></i>Dashboard de Gerenciamento de Usuários
+                </h1>
+                <p class="text-muted">SEDES - Comparação entre SOE Web e Office 365</p>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-primary" id="exportBtn">
+                    <i class="fas fa-download me-2"></i>Exportar Dados
+                </button>
+            </div>
+        </div>
+
+        <!-- Cards de Estatísticas -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="stats-number text-primary" id="totalUsers">0</div>
+                        <div class="text-muted">Total de Usuários</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="stats-number text-success" id="bothSystems">0</div>
+                        <div class="text-muted">Em Ambos os Sistemas</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="stats-number text-warning" id="onlySoe">0</div>
+                        <div class="text-muted">Apenas no SOE Web</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="stats-number text-info" id="onlyOffice">0</div>
+                        <div class="text-muted">Apenas no Office 365</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filter-section">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Pesquisar</label>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Nome, email, matrícula...">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Setor</label>
+                    <select class="form-select" id="setorFilter">
+                        <option value="">Todos os Setores</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Todos</option>
+                        <option value="both">Em Ambos</option>
+                        <option value="soe_only">Apenas SOE</option>
+                        <option value="office_only">Apenas Office 365</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Tipo de Licença</label>
+                    <select class="form-select" id="licenseFilter">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alertas de Atenção -->
+        <div class="row mb-4" id="attentionAlerts" style="display: none;">
+            <div class="col-12">
+                <div class="alert alert-warning alert-attention">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Atenção</h6>
+                    <div id="attentionContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Distribuição por Status</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="statusChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Licenças Office 365</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="licenseChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Usuários -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Lista de Usuários</h6>
+                <span class="badge bg-secondary" id="userCount">0 usuários</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover user-table" id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Matrícula</th>
+                                <th>Setor</th>
+                                <th>SOE Web</th>
+                                <th>Office 365</th>
+                                <th>Licença</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Dados serão preenchidos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados dos sistemas
+        const soeUsers = [
+            // Dados do SOE Web serão carregados aqui
+        ];
+
+        const office365Users = [
+            // Dados do Office 365 serão carregados aqui
+        ];
+
+        // Função para processar os dados
+        function processData() {
+            // Combinar dados dos dois sistemas
+            const allUsers = [];
+            const userMap = new Map();
+
+            // Processar usuários do SOE Web
+            soeUsers.forEach(user => {
+                const key = user.email?.toLowerCase() || user.nome?.toLowerCase();
+                if (key) {
+                    userMap.set(key, {
+                        ...userMap.get(key),
+                        nome: user.nome,
+                        email: user.email,
+                        matricula: user.matricula,
+                        setor: user.setor,
+                        soeWeb: true,
+                        prazoOperacao: user.prazoOperacao,
+                        ultimaSessao: user.ultimaSessao,
+                        bloqueado: user.bloqueado,
+                        cpf: user.cpf
+                    });
+                }
+            });
+
+            // Processar usuários do Office 365
+            office365Users.forEach(user => {
+                const key = user.conta?.toLowerCase() || user.nome?.toLowerCase();
+                if (key) {
+                    const existingUser = userMap.get(key) || {};
+                    userMap.set(key, {
+                        ...existingUser,
+                        nome: existingUser.nome || user.nome,
+                        email: existingUser.email || user.conta,
+                        matricula: existingUser.matricula || user.matricula,
+                        setor: existingUser.setor || user.setor,
+                        office365: true,
+                        licenca: user.licencaMPSA,
+                        tipoConta: user.tipo_conta,
+                        cargo: user.cargo
+                    });
+                }
+            });
+
+            // Converter Map para array
+            userMap.forEach(user => {
+                allUsers.push(user);
+            });
+
+            return allUsers;
+        }
+
+        // Função para atualizar estatísticas
+        function updateStats(users) {
+            const total = users.length;
+            const both = users.filter(u => u.soeWeb && u.office365).length;
+            const onlySoe = users.filter(u => u.soeWeb && !u.office365).length;
+            const onlyOffice = users.filter(u => !u.soeWeb && u.office365).length;
+
+            document.getElementById('totalUsers').textContent = total;
+            document.getElementById('bothSystems').textContent = both;
+            document.getElementById('onlySoe').textContent = onlySoe;
+            document.getElementById('onlyOffice').textContent = onlyOffice;
+            document.getElementById('userCount').textContent = `${total} usuários`;
+
+            // Atualizar gráficos
+            updateCharts(both, onlySoe, onlyOffice);
+        }
+
+        // Função para atualizar gráficos
+        function updateCharts(both, onlySoe, onlyOffice) {
+            // Gráfico de status
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Em Ambos', 'Apenas SOE', 'Apenas Office 365'],
+                    datasets: [{
+                        data: [both, onlySoe, onlyOffice],
+                        backgroundColor: ['#28a745', '#ffc107', '#17a2b8']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Gráfico de licenças
+            const licenseCtx = document.getElementById('licenseChart').getContext('2d');
+            // Contar licenças (será implementado após processamento dos dados)
+        }
+
+        // Função para renderizar tabela
+        function renderTable(users) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                
+                // Determinar status e classe
+                let status = '';
+                let statusClass = '';
+                if (user.soeWeb && user.office365) {
+                    status = 'Em Ambos';
+                    statusClass = 'success';
+                } else if (user.soeWeb) {
+                    status = 'Apenas SOE';
+                    statusClass = 'warning';
+                } else if (user.office365) {
+                    status = 'Apenas Office';
+                    statusClass = 'info';
+                }
+
+                row.innerHTML = `
+                    <td>${user.nome || 'N/A'}</td>
+                    <td>${user.email || 'N/A'}</td>
+                    <td>${user.matricula || 'N/A'}</td>
+                    <td>${user.setor || 'N/A'}</td>
+                    <td>
+                        <span class="badge bg-${user.soeWeb ? 'success' : 'secondary'}">
+                            ${user.soeWeb ? '✓' : '✗'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-${user.office365 ? 'success' : 'secondary'}">
+                            ${user.office365 ? '✓' : '✗'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark">
+                            ${user.licenca || 'N/A'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-${statusClass}">${status}</span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Função para exportar dados
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            // Implementar exportação para Excel/CSV
+            alert('Funcionalidade de exportação será implementada!');
+        });
+
+        // Função para aplicar filtros
+        function applyFilters() {
+            // Implementar lógica de filtros
+        }
+
+        // Função para carregar dados dos arquivos
+        function loadDataFromFiles() {
+            // Aqui você implementaria a leitura dos arquivos Excel
+            // Por enquanto, vamos usar dados de exemplo
+            console.log('Carregando dados dos sistemas...');
+            
+            // Simular carregamento
+            setTimeout(() => {
+                // Após carregar os dados:
+                const processedUsers = processData();
+                updateStats(processedUsers);
+                renderTable(processedUsers);
+                updateAttentionAlerts(processedUsers);
+            }, 1000);
+        }
+
+        // Função para atualizar alertas de atenção
+        function updateAttentionAlerts(users) {
+            const onlySoeUsers = users.filter(u => u.soeWeb && !u.office365);
+            const onlyOfficeUsers = users.filter(u => !u.soeWeb && u.office365);
+            
+            if (onlySoeUsers.length > 0 || onlyOfficeUsers.length > 0) {
+                let alertContent = '';
+                
+                if (onlySoeUsers.length > 0) {
+                    alertContent += `<strong>${onlySoeUsers.length} usuários</strong> estão apenas no SOE Web e não no Office 365.<br>`;
+                }
+                
+                if (onlyOfficeUsers.length > 0) {
+                    alertContent += `<strong>${onlyOfficeUsers.length} usuários</strong> estão apenas no Office 365 e não no SOE Web.`;
+                }
+                
+                document.getElementById('attentionContent').innerHTML = alertContent;
+                document.getElementById('attentionAlerts').style.display = 'block';
+            } else {
+                document.getElementById('attentionAlerts').style.display = 'none';
+            }
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDataFromFiles();
+            
+            // Event listeners para filtros
+            document.getElementById('searchInput').addEventListener('input', applyFilters);
+            document.getElementById('setorFilter').addEventListener('change', applyFilters);
+            document.getElementById('statusFilter').addEventListener('change', applyFilters);
+            document.getElementById('licenseFilter').addEventListener('change', applyFilters);
+        });
+    </script>
+</body>
+</html>
