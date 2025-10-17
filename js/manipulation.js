@@ -271,4 +271,35 @@ function standardizeDepartments() {
 }
 
 function generateLogins() {
-    dataManipulator
+    dataManipulator.generateLogins();
+}
+
+function fillMissingData() {
+    dataManipulator.fillMissingData();
+}
+
+function removeDuplicates() {
+    if (confirm('Tem certeza que deseja remover usuários duplicados?')) {
+        dataManipulator.removeDuplicates();
+    }
+}
+
+function removeInactive() {
+    if (confirm('Tem certeza que deseja remover usuários inativos?')) {
+        dataManipulator.removeInactive();
+    }
+}
+
+function cleanEmails() {
+    if (confirm('Tem certeza que deseja remover usuários com e-mails inválidos?')) {
+        dataManipulator.cleanEmails();
+    }
+}
+
+// Inicializar manipulação
+document.addEventListener('DOMContentLoaded', function() {
+    // Mostrar seção de manipulação se houver dados
+    if (AppState.users.length > 0) {
+        document.getElementById('manipulation-section').style.display = 'block';
+    }
+});
