@@ -3,139 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEDES - Análise de Usuários</title>
+    <title>Gestão de Usuários - SEDES</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🔍 SEDES - Análise de Usuários</h1>
-            <p>Plataforma de pesquisa e data science para análise de contas de usuários</p>
-        </header>
+    <!-- Header igual ao site da DTI -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <img src="https://dti-sedes.github.io/dtisedes/images/logo-sedes.png" alt="SEDES" class="logo">
+                <div class="title-section">
+                    <h1>SECRETARIA DE DESENVOLVIMENTO SOCIAL</h1>
+                    <p>GOVERNO DO ESTADO DO RIO GRANDE DO SUL</p>
+                </div>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="#import-section"><i class="fas fa-upload"></i> Importar</a></li>
+                    <li><a href="#analysis-section"><i class="fas fa-chart-bar"></i> Análise</a></li>
+                    <li><a href="#reports-section"><i class="fas fa-file-alt"></i> Relatórios</a></li>
+                    <li><a href="#help-section"><i class="fas fa-question-circle"></i> Ajuda</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Banner de Boas-vindas -->
+        <section class="welcome-banner">
+            <div class="banner-content">
+                <h2><i class="fas fa-users-cog"></i> Sistema de Gestão de Usuários</h2>
+                <p>Plataforma integrada para análise e administração de contas de usuários dos sistemas SEDES</p>
+            </div>
+        </section>
 
         <!-- Seção de Importação -->
-        <section id="import-section" class="card">
-            <h2>📤 Importar Dados</h2>
-            <div class="upload-options">
-                <div class="upload-option">
-                    <h3>Opção 1: Upload de Arquivo Excel</h3>
-                    <input type="file" id="file-input" accept=".xlsx, .xls">
-                    <small>Formato esperado: "Usuarios geral.xlsx" com abas: User AD, User Office, user SoeWeb</small>
-                </div>
-                <div class="upload-option">
-                    <h3>Opção 2: Colar Dados Manualmente</h3>
-                    <textarea id="json-input" placeholder="Cole aqui os dados em formato JSON..."></textarea>
-                    <button onclick="importFromJSON()">Importar JSON</button>
-                </div>
+        <section id="import-section" class="content-card">
+            <div class="card-header">
+                <i class="fas fa-file-import"></i>
+                <h2>Importação de Dados</h2>
             </div>
-            <div id="import-status"></div>
-        </section>
-
-        <!-- Painel de Estatísticas -->
-        <section id="stats-section" class="card" style="display: none;">
-            <h2>📊 Estatísticas Gerais</h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>Total de Usuários</h3>
-                    <span id="total-users">0</span>
+            <div class="card-body">
+                <div class="upload-options">
+                    <div class="upload-option">
+                        <div class="option-icon">
+                            <i class="fas fa-file-excel"></i>
+                        </div>
+                        <h3>Upload de Arquivo Excel</h3>
+                        <p>Faça upload do arquivo "Usuarios geral.xlsx" com as abas dos sistemas</p>
+                        <input type="file" id="file-input" accept=".xlsx, .xls" class="file-input">
+                        <small>Formatos suportados: .xlsx, .xls</small>
+                    </div>
+                    
+                    <div class="upload-option">
+                        <div class="option-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <h3>Dados Manuais</h3>
+                        <p>Cole os dados diretamente em formato JSON</p>
+                        <textarea id="json-input" placeholder='[{"login": "usuario", "nome": "Nome", ...}]'></textarea>
+                        <button class="btn-secondary" onclick="importFromJSON()">
+                            <i class="fas fa-import"></i> Importar JSON
+                        </button>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <h3>Contas Ativas</h3>
-                    <span id="active-users">0</span>
-                </div>
-                <div class="stat-card">
-                    <h3>Sem E-mail</h3>
-                    <span id="no-email">0</span>
-                </div>
-                <div class="stat-card">
-                    <h3>Inconsistências</h3>
-                    <span id="inconsistencies">0</span>
-                </div>
+                
+                <div id="import-status" class="status-message"></div>
             </div>
         </section>
 
-        <!-- Gráficos -->
-        <section id="charts-section" class="card" style="display: none;">
-            <h2>📈 Visualizações</h2>
-            <div class="charts-grid">
-                <div class="chart-container">
-                    <canvas id="department-chart"></canvas>
+        <!-- Painel de Métricas -->
+        <section id="metrics-section" class="content-card" style="display: none;">
+            <div class="card-header">
+                <i class="fas fa-tachometer-alt"></i>
+                <h2>Métricas Gerais</h2>
+            </div>
+            <div class="card-body">
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Total de Usuários</h3>
+                            <span class="metric-value" id="total-users">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-icon active">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Contas Ativas</h3>
+                            <span class="metric-value" id="active-users">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-icon warning">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Sem E-mail</h3>
+                            <span class="metric-value" id="no-email">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-icon danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="metric-info">
+                            <h3>Inconsistências</h3>
+                            <span class="metric-value" id="inconsistencies">0</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="status-chart"></canvas>
-                </div>
-                <div class="chart-container">
-                    <canvas id="license-chart"></canvas>
+            </div>
+        </section>
+
+        <!-- Análise e Visualizações -->
+        <section id="analysis-section" class="content-card" style="display: none;">
+            <div class="card-header">
+                <i class="fas fa-chart-line"></i>
+                <h2>Análise e Visualizações</h2>
+            </div>
+            <div class="card-body">
+                <div class="charts-container">
+                    <div class="chart-wrapper">
+                        <h3>Distribuição por Departamento</h3>
+                        <div class="chart-box">
+                            <canvas id="department-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-wrapper">
+                        <h3>Status das Contas</h3>
+                        <div class="chart-box">
+                            <canvas id="status-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-wrapper">
+                        <h3>Licenças Office 365</h3>
+                        <div class="chart-box">
+                            <canvas id="license-chart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- Filtros e Pesquisa -->
-        <section id="filter-section" class="card" style="display: none;">
-            <h2>🔍 Filtros e Pesquisa</h2>
-            <div class="filters">
-                <input type="text" id="search-input" placeholder="Pesquisar por nome, login, departamento...">
-                <select id="department-filter">
-                    <option value="">Todos os Departamentos</option>
-                </select>
-                <select id="status-filter">
-                    <option value="">Todos os Status</option>
-                    <option value="Habilitada">Habilitada</option>
-                    <option value="Desabilitada">Desabilitada</option>
-                </select>
-                <button onclick="applyFilters()">Aplicar Filtros</button>
-                <button onclick="clearFilters()">Limpar</button>
+        <section id="filter-section" class="content-card" style="display: none;">
+            <div class="card-header">
+                <i class="fas fa-filter"></i>
+                <h2>Filtros e Pesquisa</h2>
+            </div>
+            <div class="card-body">
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label for="search-input"><i class="fas fa-search"></i> Pesquisa</label>
+                        <input type="text" id="search-input" placeholder="Nome, login, e-mail ou departamento...">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="department-filter"><i class="fas fa-building"></i> Departamento</label>
+                        <select id="department-filter">
+                            <option value="">Todos os Departamentos</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="status-filter"><i class="fas fa-power-off"></i> Status</label>
+                        <select id="status-filter">
+                            <option value="">Todos os Status</option>
+                            <option value="Habilitada">Habilitada</option>
+                            <option value="Desabilitada">Desabilitada</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-actions">
+                        <button class="btn-primary" onclick="applyFilters()">
+                            <i class="fas fa-check"></i> Aplicar Filtros
+                        </button>
+                        <button class="btn-secondary" onclick="clearFilters()">
+                            <i class="fas fa-times"></i> Limpar
+                        </button>
+                    </div>
+                </div>
             </div>
         </section>
 
         <!-- Tabela de Usuários -->
-        <section id="table-section" class="card" style="display: none;">
-            <h2>👥 Lista de Usuários</h2>
-            <div class="table-controls">
-                <button onclick="exportToPDF()">📄 Exportar PDF</button>
-                <button onclick="exportToExcel()">📊 Exportar Excel</button>
-                <button onclick="showProblematicUsers()">⚠️ Ver Problemas</button>
+        <section id="users-section" class="content-card" style="display: none;">
+            <div class="card-header">
+                <i class="fas fa-table"></i>
+                <h2>Lista de Usuários</h2>
+                <div class="header-actions">
+                    <button class="btn-primary" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i> Exportar Excel
+                    </button>
+                    <button class="btn-secondary" onclick="showProblematicUsers()">
+                        <i class="fas fa-exclamation-triangle"></i> Ver Problemas
+                    </button>
+                </div>
             </div>
-            <div class="table-container">
-                <table id="users-table">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Login</th>
-                            <th>E-mail</th>
-                            <th>Departamento</th>
-                            <th>Status AD</th>
-                            <th>Último Logon</th>
-                            <th>Licença Office</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="users-table-body">
-                        <!-- Dados serão inseridos via JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="pagination">
-                <button id="prev-page">Anterior</button>
-                <span id="page-info">Página 1 de 1</span>
-                <button id="next-page">Próxima</button>
+            <div class="card-body">
+                <div class="table-container">
+                    <table id="users-table" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Login</th>
+                                <th>E-mail</th>
+                                <th>Departamento</th>
+                                <th>Status</th>
+                                <th>Último Logon</th>
+                                <th>Licença</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <!-- Dados serão inseridos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination">
+                    <button id="prev-page" class="btn-pagination">
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </button>
+                    <span id="page-info" class="page-info">Página 1 de 1</span>
+                    <button id="next-page" class="btn-pagination">
+                        Próxima <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
             </div>
         </section>
 
-        <!-- Modal para Detalhes do Usuário -->
+        <!-- Modal de Detalhes -->
         <div id="user-modal" class="modal">
             <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>Detalhes do Usuário</h2>
-                <div id="user-details">
-                    <!-- Detalhes serão preenchidos via JavaScript -->
+                <div class="modal-header">
+                    <h2><i class="fas fa-user"></i> Detalhes do Usuário</h2>
+                    <span class="close">&times;</span>
                 </div>
-                <button onclick="printUserCard()">🖨️ Imprimir Ficha</button>
+                <div class="modal-body">
+                    <div id="user-details">
+                        <!-- Detalhes serão preenchidos via JavaScript -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeModal()">
+                        <i class="fas fa-times"></i> Fechar
+                    </button>
+                    <button class="btn-primary" onclick="exportUserCard()">
+                        <i class="fas fa-print"></i> Imprimir Ficha
+                    </button>
+                </div>
             </div>
         </div>
+
+        <!-- Seção de Ajuda -->
+        <section id="help-section" class="content-card">
+            <div class="card-header">
+                <i class="fas fa-question-circle"></i>
+                <h2>Ajuda e Suporte</h2>
+            </div>
+            <div class="card-body">
+                <div class="help-content">
+                    <div class="help-item">
+                        <h3><i class="fas fa-file-upload"></i> Como Importar Dados</h3>
+                        <p>Utilize o arquivo Excel padrão com as abas: "User AD", "User Office" e "user SoeWeb"</p>
+                    </div>
+                    
+                    <div class="help-item">
+                        <h3><i class="fas fa-chart-bar"></i> Análise de Dados</h3>
+                        <p>O sistema identifica automaticamente inconsistências entre os sistemas</p>
+                    </div>
+                    
+                    <div class="help-item">
+                        <h3><i class="fas fa-download"></i> Exportação</h3>
+                        <p>Exporte relatórios em Excel ou gere fichas individuais dos usuários</p>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-container">
+            <p>&copy; 2024 Secretaria de Desenvolvimento Social - SEDES/RS. Todos os direitos reservados.</p>
+            <p>Desenvolvido pela Divisão de Tecnologia da Informação - DTI</p>
+        </div>
+    </footer>
 
     <script src="js/app.js"></script>
     <script src="js/import.js"></script>
