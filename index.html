@@ -3,447 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Pesquisas</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        header {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: white;
-            padding: 30px 0;
-            text-align: center;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
-        }
-        
-        .card-title {
-            font-size: 1.5rem;
-            color: #2c3e50;
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary {
-            background-color: #3498db;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #2980b9;
-        }
-        
-        .btn-success {
-            background-color: #2ecc71;
-            color: white;
-        }
-        
-        .btn-success:hover {
-            background-color: #27ae60;
-        }
-        
-        .import-section {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .file-input {
-            padding: 10px;
-            border: 2px dashed #3498db;
-            border-radius: 5px;
-            background-color: #f8fafc;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .file-input:hover {
-            background-color: #e8f4fc;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e1e1e1;
-        }
-        
-        th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        tr:hover {
-            background-color: #f8f9fa;
-        }
-        
-        .status-completed {
-            color: #2ecc71;
-            font-weight: 600;
-        }
-        
-        .status-pending {
-            color: #e74c3c;
-            font-weight: 600;
-        }
-        
-        .search-bar {
-            display: flex;
-            margin-bottom: 20px;
-        }
-        
-        .search-bar input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px 0 0 5px;
-            font-size: 1rem;
-        }
-        
-        .search-bar button {
-            padding: 12px 20px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 0 5px 5px 0;
-            cursor: pointer;
-        }
-        
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-        }
-        
-        @media (max-width: 768px) {
-            .card-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-            
-            th, td {
-                padding: 8px 10px;
-            }
-        }
-    </style>
+    <title>SEDES - Análise de Usuários</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Sistema de Gerenciamento de Pesquisas</h1>
-            <p class="subtitle">Visualize, gerencie e importe dados de pesquisa</p>
+            <h1>🔍 SEDES - Análise de Usuários</h1>
+            <p>Plataforma de pesquisa e data science para análise de contas de usuários</p>
         </header>
-        
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Importar Dados de Pesquisa</h2>
-            </div>
-            <div class="import-section">
-                <p>Faça upload de um arquivo CSV contendo os dados da pesquisa. O arquivo deve conter as colunas: ID, Título, Descrição, Data, Participantes e Status.</p>
-                <div class="file-input" id="fileDropArea">
-                    <p>Arraste e solte o arquivo CSV aqui ou clique para selecionar</p>
-                    <input type="file" id="fileInput" accept=".csv" style="display: none;">
+
+        <!-- Seção de Importação -->
+        <section id="import-section" class="card">
+            <h2>📤 Importar Dados</h2>
+            <div class="upload-options">
+                <div class="upload-option">
+                    <h3>Opção 1: Upload de Arquivo Excel</h3>
+                    <input type="file" id="file-input" accept=".xlsx, .xls">
+                    <small>Formato esperado: "Usuarios geral.xlsx" com abas: User AD, User Office, user SoeWeb</small>
                 </div>
-                <button class="btn btn-primary" id="importBtn" disabled>Importar Dados</button>
-            </div>
-        </div>
-        
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Pesquisas Cadastradas</h2>
-                <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="Buscar por título ou descrição...">
-                    <button id="searchBtn">Buscar</button>
+                <div class="upload-option">
+                    <h3>Opção 2: Colar Dados Manualmente</h3>
+                    <textarea id="json-input" placeholder="Cole aqui os dados em formato JSON..."></textarea>
+                    <button onclick="importFromJSON()">Importar JSON</button>
                 </div>
+            </div>
+            <div id="import-status"></div>
+        </section>
+
+        <!-- Painel de Estatísticas -->
+        <section id="stats-section" class="card" style="display: none;">
+            <h2>📊 Estatísticas Gerais</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total de Usuários</h3>
+                    <span id="total-users">0</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Contas Ativas</h3>
+                    <span id="active-users">0</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Sem E-mail</h3>
+                    <span id="no-email">0</span>
+                </div>
+                <div class="stat-card">
+                    <h3>Inconsistências</h3>
+                    <span id="inconsistencies">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gráficos -->
+        <section id="charts-section" class="card" style="display: none;">
+            <h2>📈 Visualizações</h2>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <canvas id="department-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="status-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="license-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filtros e Pesquisa -->
+        <section id="filter-section" class="card" style="display: none;">
+            <h2>🔍 Filtros e Pesquisa</h2>
+            <div class="filters">
+                <input type="text" id="search-input" placeholder="Pesquisar por nome, login, departamento...">
+                <select id="department-filter">
+                    <option value="">Todos os Departamentos</option>
+                </select>
+                <select id="status-filter">
+                    <option value="">Todos os Status</option>
+                    <option value="Habilitada">Habilitada</option>
+                    <option value="Desabilitada">Desabilitada</option>
+                </select>
+                <button onclick="applyFilters()">Aplicar Filtros</button>
+                <button onclick="clearFilters()">Limpar</button>
+            </div>
+        </section>
+
+        <!-- Tabela de Usuários -->
+        <section id="table-section" class="card" style="display: none;">
+            <h2>👥 Lista de Usuários</h2>
+            <div class="table-controls">
+                <button onclick="exportToPDF()">📄 Exportar PDF</button>
+                <button onclick="exportToExcel()">📊 Exportar Excel</button>
+                <button onclick="showProblematicUsers()">⚠️ Ver Problemas</button>
             </div>
             <div class="table-container">
-                <table id="researchTable">
+                <table id="users-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Título</th>
-                            <th>Descrição</th>
-                            <th>Data</th>
-                            <th>Participantes</th>
-                            <th>Status</th>
+                            <th>Nome</th>
+                            <th>Login</th>
+                            <th>E-mail</th>
+                            <th>Departamento</th>
+                            <th>Status AD</th>
+                            <th>Último Logon</th>
+                            <th>Licença Office</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="researchTableBody">
-                        <!-- Dados serão inseridos aqui via JavaScript -->
+                    <tbody id="users-table-body">
+                        <!-- Dados serão inseridos via JavaScript -->
                     </tbody>
                 </table>
             </div>
+            <div class="pagination">
+                <button id="prev-page">Anterior</button>
+                <span id="page-info">Página 1 de 1</span>
+                <button id="next-page">Próxima</button>
+            </div>
+        </section>
+
+        <!-- Modal para Detalhes do Usuário -->
+        <div id="user-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Detalhes do Usuário</h2>
+                <div id="user-details">
+                    <!-- Detalhes serão preenchidos via JavaScript -->
+                </div>
+                <button onclick="printUserCard()">🖨️ Imprimir Ficha</button>
+            </div>
         </div>
-        
-        <footer>
-            <p>Sistema de Gerenciamento de Pesquisas &copy; 2023 - Todos os direitos reservados</p>
-        </footer>
     </div>
 
-    <script>
-        // Dados de exemplo
-        const sampleData = [
-            {
-                id: 1,
-                title: "Satisfação do Cliente",
-                description: "Pesquisa para avaliar a satisfação dos clientes com nossos serviços",
-                date: "2023-10-15",
-                participants: 250,
-                status: "Concluída"
-            },
-            {
-                id: 2,
-                title: "Hábitos de Consumo",
-                description: "Estudo sobre os hábitos de consumo da população urbana",
-                date: "2023-11-05",
-                participants: 180,
-                status: "Em andamento"
-            },
-            {
-                id: 3,
-                title: "Preferências de Marca",
-                description: "Pesquisa para entender as preferências de marca entre jovens adultos",
-                date: "2023-09-22",
-                participants: 320,
-                status: "Concluída"
-            },
-            {
-                id: 4,
-                title: "Impacto das Redes Sociais",
-                description: "Análise do impacto das redes sociais no comportamento de compra",
-                date: "2023-12-01",
-                participants: 95,
-                status: "Em andamento"
-            }
-        ];
-
-        // Elementos DOM
-        const fileInput = document.getElementById('fileInput');
-        const fileDropArea = document.getElementById('fileDropArea');
-        const importBtn = document.getElementById('importBtn');
-        const researchTableBody = document.getElementById('researchTableBody');
-        const searchInput = document.getElementById('searchInput');
-        const searchBtn = document.getElementById('searchBtn');
-
-        // Inicializar tabela com dados de exemplo
-        function initializeTable() {
-            researchTableBody.innerHTML = '';
-            sampleData.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item.id}</td>
-                    <td>${item.title}</td>
-                    <td>${item.description}</td>
-                    <td>${formatDate(item.date)}</td>
-                    <td>${item.participants}</td>
-                    <td class="${item.status === 'Concluída' ? 'status-completed' : 'status-pending'}">${item.status}</td>
-                `;
-                researchTableBody.appendChild(row);
-            });
-        }
-
-        // Formatar data
-        function formatDate(dateString) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return new Date(dateString).toLocaleDateString('pt-BR', options);
-        }
-
-        // Configurar área de arrastar e soltar
-        fileDropArea.addEventListener('click', () => {
-            fileInput.click();
-        });
-
-        fileDropArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            fileDropArea.style.backgroundColor = '#e8f4fc';
-        });
-
-        fileDropArea.addEventListener('dragleave', () => {
-            fileDropArea.style.backgroundColor = '#f8fafc';
-        });
-
-        fileDropArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            fileDropArea.style.backgroundColor = '#f8fafc';
-            
-            if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-                updateImportButton();
-            }
-        });
-
-        fileInput.addEventListener('change', updateImportButton);
-
-        function updateImportButton() {
-            if (fileInput.files.length > 0) {
-                importBtn.disabled = false;
-                fileDropArea.innerHTML = `<p>Arquivo selecionado: ${fileInput.files[0].name}</p>`;
-            } else {
-                importBtn.disabled = true;
-                fileDropArea.innerHTML = `<p>Arraste e solte o arquivo CSV aqui ou clique para selecionar</p>`;
-            }
-        }
-
-        // Função de importação
-        importBtn.addEventListener('click', () => {
-            if (fileInput.files.length === 0) return;
-            
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                try {
-                    const csvData = e.target.result;
-                    const rows = csvData.split('\n');
-                    const headers = rows[0].split(',');
-                    
-                    // Validar cabeçalhos
-                    const expectedHeaders = ['id', 'title', 'description', 'date', 'participants', 'status'];
-                    const isValid = expectedHeaders.every(header => 
-                        headers.map(h => h.trim().toLowerCase()).includes(header)
-                    );
-                    
-                    if (!isValid) {
-                        alert('Formato de arquivo inválido. Verifique se o CSV contém as colunas corretas.');
-                        return;
-                    }
-                    
-                    // Processar dados
-                    const newData = [];
-                    for (let i = 1; i < rows.length; i++) {
-                        if (rows[i].trim() === '') continue;
-                        
-                        const cells = rows[i].split(',');
-                        if (cells.length === headers.length) {
-                            newData.push({
-                                id: parseInt(cells[0].trim()),
-                                title: cells[1].trim(),
-                                description: cells[2].trim(),
-                                date: cells[3].trim(),
-                                participants: parseInt(cells[4].trim()),
-                                status: cells[5].trim()
-                            });
-                        }
-                    }
-                    
-                    // Adicionar novos dados à tabela
-                    newData.forEach(item => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${item.id}</td>
-                            <td>${item.title}</td>
-                            <td>${item.description}</td>
-                            <td>${formatDate(item.date)}</td>
-                            <td>${item.participants}</td>
-                            <td class="${item.status === 'Concluída' ? 'status-completed' : 'status-pending'}">${item.status}</td>
-                        `;
-                        researchTableBody.appendChild(row);
-                    });
-                    
-                    alert(`Dados importados com sucesso! ${newData.length} registros adicionados.`);
-                    fileInput.value = '';
-                    updateImportButton();
-                    
-                } catch (error) {
-                    alert('Erro ao processar o arquivo: ' + error.message);
-                }
-            };
-            
-            reader.readAsText(file);
-        });
-
-        // Função de busca
-        function performSearch() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const rows = researchTableBody.getElementsByTagName('tr');
-            
-            for (let row of rows) {
-                const title = row.cells[1].textContent.toLowerCase();
-                const description = row.cells[2].textContent.toLowerCase();
-                
-                if (title.includes(searchTerm) || description.includes(searchTerm)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            }
-        }
-
-        searchBtn.addEventListener('click', performSearch);
-        searchInput.addEventListener('keyup', (e) => {
-            if (e.key === 'Enter') {
-                performSearch();
-            }
-        });
-
-        // Inicializar a página
-        initializeTable();
-    </script>
+    <script src="js/app.js"></script>
+    <script src="js/import.js"></script>
+    <script src="js/analyze.js"></script>
+    <script src="js/export.js"></script>
 </body>
 </html>
