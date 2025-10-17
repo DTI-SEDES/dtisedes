@@ -387,4 +387,295 @@
                     labels: ['Em Ambos', 'Apenas SOE', 'Apenas Office 365'],
                     datasets: [{
                         data: [both, onlySoe, onlyOffice],
-                        backgroundColor: ['#28a745', '#ffc107',
+                        backgroundColor: ['#28a745', '#ffc107', '#17a2b8']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Gráfico de licenças
+            const licenseCounts = {};
+            users.forEach(user => {
+                if (user.licenca) {
+                    licenseCounts[user.licenca] = (licenseCounts[user.licenca] || 0) + 1;
+                }
+            });
+
+            const licenseCtx = document.getElementById('licenseChart').getContext('2d');
+            
+            // Destruir gráfico anterior se existir
+            if (licenseChartInstance) {
+                licenseChartInstance.destroy();
+            }
+            
+            // Se não há licenças, mostrar mensagem
+            if (Object.keys(licenseCounts).length === 0) {
+                licenseChartInstance = new Chart(licenseCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Sem dados'],
+                        datasets: [{
+                            label: 'Licenças',
+                            data: [0],
+                            backgroundColor: '#6c757d'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            } else {
+                licenseChartInstance = new Chart(licenseCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(licenseCounts),
+                        datasets: [{
+                            label: 'Quantidade',
+                            data: Object.values(licenseCounts),
+                            backgroundColor: '#007bff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Função para renderizar tabela
+        function renderTable(users) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+
+            if (users.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="8" class="text-center text-muted">Nenhum usuário encontrado</td>`;
+                tbody.appendChild(row);
+                return;
+            }
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                
+                // Determinar status e classe
+                let status = '';
+                let statusClass = '';
+                if (user.soeWeb && user.office365) {
+                    status = 'Em Ambos';
+                    statusClass = 'success';
+                } else if (user.soeWeb) {
+                    status = 'Apenas SOE';
+                    statusClass = 'warning';
+                } else if (user.office365) {
+                    status = 'Apenas Office';
+                    statusClass = 'info';
+                }
+
+                row.innerHTML = `
+                    <td>${user.nome || 'N/A'}</td>
+                    <td>${user.email || 'N/A'}</td>
+                    <td>${user.matricula || 'N/A'}</td>
+                    <td>${user.setor || 'N/A'}</td>
+                    <td>
+                        <span class="badge bg-${user.soeWeb ? 'success' : 'secondary'}">
+                            ${user.soeWeb ? '✓' : '✗'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-${user.office365 ? 'success' : 'secondary'}">
+                            ${user.office365 ? '✓' : '✗'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark">
+                            ${user.licenca || 'N/A'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-${statusClass}">${status}</span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Função para atualizar filtros
+        function updateFilters(users) {
+            const setores = new Set();
+            const licencas = new Set();
+
+            users.forEach(user => {
+                if (user.setor) setores.add(user.setor);
+                if (user.licenca) licencas.add(user.licenca);
+            });
+
+            // Atualizar filtro de setores
+            const setorFilter = document.getElementById('setorFilter');
+            // Limpar opções existentes (exceto a primeira)
+            while (setorFilter.children.length > 1) {
+                setorFilter.removeChild(setorFilter.lastChild);
+            }
+            
+            setores.forEach(setor => {
+                const option = document.createElement('option');
+                option.value = setor;
+                option.textContent = setor;
+                setorFilter.appendChild(option);
+            });
+
+            // Atualizar filtro de licenças
+            const licenseFilter = document.getElementById('licenseFilter');
+            // Limpar opções existentes (exceto a primeira)
+            while (licenseFilter.children.length > 1) {
+                licenseFilter.removeChild(licenseFilter.lastChild);
+            }
+            
+            licencas.forEach(licenca => {
+                const option = document.createElement('option');
+                option.value = licenca;
+                option.textContent = licenca;
+                licenseFilter.appendChild(option);
+            });
+        }
+
+        // Função para aplicar filtros
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const setorFilter = document.getElementById('setorFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const licenseFilter = document.getElementById('licenseFilter').value;
+
+            const filteredUsers = window.allUsers.filter(user => {
+                // Filtro de pesquisa
+                const matchesSearch = !searchTerm || 
+                    (user.nome && user.nome.toLowerCase().includes(searchTerm)) ||
+                    (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+                    (user.matricula && user.matricula.includes(searchTerm));
+
+                // Filtro de setor
+                const matchesSetor = !setorFilter || user.setor === setorFilter;
+
+                // Filtro de status
+                let matchesStatus = true;
+                if (statusFilter === 'both') {
+                    matchesStatus = user.soeWeb && user.office365;
+                } else if (statusFilter === 'soe_only') {
+                    matchesStatus = user.soeWeb && !user.office365;
+                } else if (statusFilter === 'office_only') {
+                    matchesStatus = !user.soeWeb && user.office365;
+                }
+
+                // Filtro de licença
+                const matchesLicense = !licenseFilter || user.licenca === licenseFilter;
+
+                return matchesSearch && matchesSetor && matchesStatus && matchesLicense;
+            });
+
+            renderTable(filteredUsers);
+            updateStats(filteredUsers);
+        }
+
+        // Função para exportar dados
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            const users = window.allUsers || [];
+            
+            if (users.length === 0) {
+                alert('Nenhum dado para exportar!');
+                return;
+            }
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Nome,Email,Matrícula,Setor,SOE Web,Office 365,Licença,Status\n";
+
+            users.forEach(user => {
+                const status = user.soeWeb && user.office365 ? 'Em Ambos' : 
+                             user.soeWeb ? 'Apenas SOE' : 
+                             user.office365 ? 'Apenas Office 365' : 'N/A';
+                
+                const row = [
+                    `"${user.nome || ''}"`,
+                    `"${user.email || ''}"`,
+                    `"${user.matricula || ''}"`,
+                    `"${user.setor || ''}"`,
+                    user.soeWeb ? 'Sim' : 'Não',
+                    user.office365 ? 'Sim' : 'Não',
+                    `"${user.licenca || ''}"`,
+                    `"${status}"`
+                ].join(',');
+                
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "usuarios_sedes.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // Função para atualizar alertas de atenção
+        function updateAttentionAlerts(users) {
+            const onlySoeUsers = users.filter(u => u.soeWeb && !u.office365);
+            const onlyOfficeUsers = users.filter(u => !u.soeWeb && u.office365);
+            
+            if (onlySoeUsers.length > 0 || onlyOfficeUsers.length > 0) {
+                let alertContent = '';
+                
+                if (onlySoeUsers.length > 0) {
+                    alertContent += `<strong>${onlySoeUsers.length} usuários</strong> estão apenas no SOE Web e não no Office 365.<br>`;
+                }
+                
+                if (onlyOfficeUsers.length > 0) {
+                    alertContent += `<strong>${onlyOfficeUsers.length} usuários</strong> estão apenas no Office 365 e não no SOE Web.`;
+                }
+                
+                document.getElementById('attentionContent').innerHTML = alertContent;
+                document.getElementById('attentionAlerts').style.display = 'block';
+            } else {
+                document.getElementById('attentionAlerts').style.display = 'none';
+            }
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Esconder loading e mostrar tabela
+            setTimeout(() => {
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('tableContainer').style.display = 'block';
+                
+                // Processar dados
+                window.allUsers = processData();
+                
+                // Atualizar interface
+                updateStats(window.allUsers);
+                renderTable(window.allUsers);
+                updateFilters(window.allUsers);
+                updateAttentionAlerts(window.allUsers);
+                
+                // Event listeners para filtros
+                document.getElementById('searchInput').addEventListener('input', applyFilters);
+                document.getElementById('setorFilter').addEventListener('change', applyFilters);
+                document.getElementById('statusFilter').addEventListener('change', applyFilters);
+                document.getElementById('licenseFilter').addEventListener('change', applyFilters);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
