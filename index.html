@@ -3,671 +3,679 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Gerenciamento de Usuários SEDES</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Dashboard - Gerenciamento de Usuários SEDES</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root {
-            --primary-color: #1a56db;
-            --secondary-color: #6b7280;
-            --danger-color: #dc2626;
-            --warning-color: #f59e0b;
-            --success-color: #059669;
-            --light-bg: #f9fafb;
-            --border-color: #e5e7eb;
+        .card {
+            transition: transform 0.2s;
+            margin-bottom: 1rem;
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        
-        body {
-            background-color: var(--light-bg);
-            color: #1f2937;
-            line-height: 1.6;
+        .status-badge {
+            font-size: 0.75rem;
         }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
+        .user-table {
+            font-size: 0.875rem;
         }
-        
-        header {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .alert-attention {
+            border-left: 4px solid #dc3545;
         }
-        
-        .header-info {
-            display: flex;
-            flex-direction: column;
+        .filter-section {
+            background-color: #f8f9fa;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
         }
-        
-        h1 {
-            color: var(--primary-color);
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-        
-        .subtitle {
-            color: var(--secondary-color);
-            font-size: 16px;
-        }
-        
-        .logo {
-            height: 60px;
-        }
-        
-        .alert-box {
-            background-color: #fef3cd;
-            border: 1px solid #fde68a;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .alert-icon {
-            color: var(--warning-color);
-            font-size: 20px;
-            margin-right: 10px;
-        }
-        
-        .alert-content h3 {
-            color: var(--warning-color);
-            margin-bottom: 5px;
-        }
-        
-        .alert-content p {
-            color: #92400e;
-        }
-        
-        .search-section {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        
-        .search-form {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        label {
-            font-weight: 500;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        
-        input, select {
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        
-        .search-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #1e40af;
-        }
-        
-        .btn-secondary {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #4b5563;
-        }
-        
-        .btn-success {
-            background-color: var(--success-color);
-            color: white;
-        }
-        
-        .btn-success:hover {
-            background-color: #047857;
-        }
-        
-        .btn-warning {
-            background-color: var(--warning-color);
-            color: white;
-        }
-        
-        .btn-warning:hover {
-            background-color: #d97706;
-        }
-        
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 20px;
-        }
-        
-        .tab {
-            padding: 12px 20px;
-            cursor: pointer;
-            font-weight: 500;
-            border-bottom: 2px solid transparent;
-        }
-        
-        .tab.active {
-            border-bottom: 2px solid var(--primary-color);
-            color: var(--primary-color);
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        
-        .data-table th, .data-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .data-table th {
-            background-color: #f8fafc;
-            font-weight: 600;
-            color: var(--secondary-color);
-            font-size: 14px;
-        }
-        
-        .data-table tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .data-table tr:hover {
-            background-color: #f9fafb;
-        }
-        
-        .blocked {
-            color: var(--danger-color);
-            font-weight: 500;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .action-btn {
-            padding: 6px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .btn-export {
-            background-color: var(--success-color);
-            color: white;
-        }
-        
-        .btn-edit {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .stat-card {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        .stats-card {
             text-align: center;
+            padding: 1rem;
         }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 5px;
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
         }
-        
-        .stat-label {
-            color: var(--secondary-color);
-            font-size: 14px;
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.075);
         }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--secondary-color);
-        }
-        
-        .user-form {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
-        }
-        
-        .form-actions {
-            grid-column: 1 / -1;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .user-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .detail-item {
-            margin-bottom: 10px;
-        }
-        
-        .detail-label {
-            font-weight: 500;
-            color: var(--secondary-color);
-            font-size: 14px;
-        }
-        
-        .detail-value {
-            margin-top: 5px;
-        }
-        
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-            gap: 5px;
-        }
-        
-        .pagination button {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            background-color: white;
-            color: var(--secondary-color);
-        }
-        
-        .pagination button.active {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-        
-        .table-container {
-            overflow-x: auto;
-        }
-        
         .loading {
             text-align: center;
-            padding: 20px;
-            color: var(--secondary-color);
+            padding: 2rem;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="header-info">
-                <h1>Dashboard Gerenciamento de Usuários SEDES</h1>
-                <p class="subtitle">Licenças Office 365 / SoeWeb</p>
+    <div class="container-fluid py-4">
+        <!-- Cabeçalho -->
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-users me-2"></i>Dashboard de Gerenciamento de Usuários
+                </h1>
+                <p class="text-muted">SEDES - Comparação entre SOE Web e Office 365</p>
             </div>
-            <img src="https://dti-sedes.github.io/dtisedes/images/logo-sedes.png" alt="Logo SEDES" class="logo">
-        </header>
-        
-        <div class="alert-box">
-            <div class="alert-icon">⚠️</div>
-            <div class="alert-content">
-                <h3>Atenção: Pendências de Cadastro</h3>
-                <p>Existem usuários com pendências de cadastro que precisam ser resolvidas.</p>
+            <div class="col-auto">
+                <button class="btn btn-primary" id="exportBtn">
+                    <i class="fas fa-download me-2"></i>Exportar Dados
+                </button>
             </div>
         </div>
-        
-        <div class="search-section">
-            <form class="search-form" id="searchForm">
-                <div class="form-group">
-                    <label for="searchName">Nome</label>
-                    <input type="text" id="searchName" placeholder="Digite o nome">
+
+        <!-- Cards de Estatísticas -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="stats-number text-primary" id="totalUsers">0</div>
+                        <div class="text-muted">Total de Usuários</div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="searchSetor">Setor</label>
-                    <select id="searchSetor">
-                        <option value="">Todos os setores</option>
-                        <!-- Setores serão preenchidos via JavaScript -->
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="stats-number text-success" id="bothSystems">0</div>
+                        <div class="text-muted">Em Ambos os Sistemas</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="stats-number text-warning" id="onlySoe">0</div>
+                        <div class="text-muted">Apenas no SOE Web</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="stats-number text-info" id="onlyOffice">0</div>
+                        <div class="text-muted">Apenas no Office 365</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filter-section">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Pesquisar</label>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Nome, email, matrícula...">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Setor</label>
+                    <select class="form-select" id="setorFilter">
+                        <option value="">Todos os Setores</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="searchCPF">CPF</label>
-                    <input type="text" id="searchCPF" placeholder="Digite o CPF">
-                </div>
-                <div class="form-group">
-                    <label for="searchMatricula">Matrícula</label>
-                    <input type="text" id="searchMatricula" placeholder="Digite a matrícula">
-                </div>
-            </form>
-            <div class="search-actions">
-                <button class="btn-primary" id="searchBtn">
-                    <i class="fas fa-search"></i> Pesquisar
-                </button>
-                <button class="btn-secondary" id="clearBtn">
-                    <i class="fas fa-eraser"></i> Limpar
-                </button>
-                <button class="btn-success" id="newUserBtn">
-                    <i class="fas fa-user-plus"></i> Novo Usuário
-                </button>
-            </div>
-        </div>
-        
-        <div class="stats-container">
-            <div class="stat-card">
-                <div class="stat-value" id="totalUsers">0</div>
-                <div class="stat-label">Total de Usuários</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="office365Users">0</div>
-                <div class="stat-label">Licenças Office 365</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="soeWebUsers">0</div>
-                <div class="stat-label">Usuários SoeWeb</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="blockedUsers">0</div>
-                <div class="stat-label">Usuários Bloqueados</div>
-            </div>
-        </div>
-        
-        <div class="tabs">
-            <div class="tab active" data-tab="office365">Office 365</div>
-            <div class="tab" data-tab="soeweb">SoeWeb</div>
-            <div class="tab" data-tab="comparison">Comparativo</div>
-        </div>
-        
-        <div class="tab-content active" id="office365Tab">
-            <div class="table-container">
-                <table class="data-table" id="office365Table">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>E-mail</th>
-                            <th>Setor</th>
-                            <th>Matrícula</th>
-                            <th>Tipo Licença</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Dados serão preenchidos via JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="pagination" id="office365Pagination">
-                <!-- Paginação será preenchida via JavaScript -->
-            </div>
-        </div>
-        
-        <div class="tab-content" id="soewebTab">
-            <div class="table-container">
-                <table class="data-table" id="soewebTable">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>E-mail</th>
-                            <th>Setor</th>
-                            <th>Matrícula</th>
-                            <th>Status</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Dados serão preenchidos via JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="pagination" id="soewebPagination">
-                <!-- Paginação será preenchida via JavaScript -->
-            </div>
-        </div>
-        
-        <div class="tab-content" id="comparisonTab">
-            <div class="table-container">
-                <table class="data-table" id="comparisonTable">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>E-mail</th>
-                            <th>Setor</th>
-                            <th>Matrícula</th>
-                            <th>Office 365</th>
-                            <th>SoeWeb</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Dados serão preenchidos via JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="pagination" id="comparisonPagination">
-                <!-- Paginação será preenchida via JavaScript -->
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal para cadastro de novo usuário -->
-    <div class="modal" id="newUserModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Cadastrar Novo Usuário</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <form class="user-form" id="newUserForm">
-                <div class="form-group">
-                    <label for="newUserName">Nome Completo</label>
-                    <input type="text" id="newUserName" required>
-                </div>
-                <div class="form-group">
-                    <label for="newUserEmail">E-mail</label>
-                    <input type="email" id="newUserEmail" required>
-                </div>
-                <div class="form-group">
-                    <label for="newUserSetor">Setor</label>
-                    <select id="newUserSetor" required>
-                        <!-- Setores serão preenchidos via JavaScript -->
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Todos</option>
+                        <option value="both">Em Ambos</option>
+                        <option value="soe_only">Apenas SOE</option>
+                        <option value="office_only">Apenas Office 365</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="newUserMatricula">Matrícula</label>
-                    <input type="text" id="newUserMatricula" required>
-                </div>
-                <div class="form-group">
-                    <label for="newUserCPF">CPF</label>
-                    <input type="text" id="newUserCPF" required>
-                </div>
-                <div class="form-group">
-                    <label for="newUserLicense">Tipo de Licença</label>
-                    <select id="newUserLicense" required>
-                        <option value="">Selecione...</option>
-                        <option value="Office 365 E1">Office 365 E1</option>
-                        <option value="Office 365 E3">Office 365 E3</option>
-                        <option value="Office 365 F3">Office 365 F3</option>
-                        <option value="Exchange online Kiosk Shared">Exchange online Kiosk Shared</option>
+                <div class="col-md-3">
+                    <label class="form-label">Tipo de Licença</label>
+                    <select class="form-select" id="licenseFilter">
+                        <option value="">Todas</option>
                     </select>
                 </div>
-                <div class="form-actions">
-                    <button type="button" class="btn-secondary" id="cancelUserBtn">Cancelar</button>
-                    <button type="submit" class="btn-primary">Salvar</button>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
-    
-    <!-- Modal para visualização de usuário -->
-    <div class="modal" id="userDetailModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Detalhes do Usuário</h2>
-                <button class="close-modal">&times;</button>
+
+        <!-- Alertas de Atenção -->
+        <div class="row mb-4" id="attentionAlerts" style="display: none;">
+            <div class="col-12">
+                <div class="alert alert-warning alert-attention">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Atenção</h6>
+                    <div id="attentionContent"></div>
+                </div>
             </div>
-            <div class="user-details" id="userDetails">
-                <!-- Detalhes serão preenchidos via JavaScript -->
+        </div>
+
+        <!-- Gráficos -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Distribuição por Status</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="statusChart" height="250"></canvas>
+                    </div>
+                </div>
             </div>
-            <div class="form-actions">
-                <button class="btn-success" id="exportUserBtn">
-                    <i class="fas fa-file-export"></i> Exportar Ficha
-                </button>
-                <button class="btn-primary" id="editUserBtn">
-                    <i class="fas fa-edit"></i> Editar Usuário
-                </button>
-                <button class="btn-secondary" id="closeDetailBtn">Fechar</button>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Licenças Office 365</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="licenseChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Usuários -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Lista de Usuários</h6>
+                <span class="badge bg-secondary" id="userCount">0 usuários</span>
+            </div>
+            <div class="card-body">
+                <div id="loadingMessage" class="loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-2">Carregando dados dos usuários...</p>
+                </div>
+                <div class="table-responsive" id="tableContainer" style="display: none;">
+                    <table class="table table-sm table-hover user-table" id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Matrícula</th>
+                                <th>Setor</th>
+                                <th>SOE Web</th>
+                                <th>Office 365</th>
+                                <th>Licença</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Dados serão preenchidos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal para edição de usuário -->
-    <div class="modal" id="editUserModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Editar Usuário</h2>
-                <button class="close-modal">&times;</button>
-            </div>
-            <form class="user-form" id="editUserForm">
-                <div class="form-group">
-                    <label for="editUserName">Nome Completo</label>
-                    <input type="text" id="editUserName" required>
-                </div>
-                <div class="form-group">
-                    <label for="editUserEmail">E-mail</label>
-                    <input type="email" id="editUserEmail" required>
-                </div>
-                <div class="form-group">
-                    <label for="editUserSetor">Setor</label>
-                    <select id="editUserSetor" required>
-                        <!-- Setores serão preenchidos via JavaScript -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="editUserMatricula">Matrícula</label>
-                    <input type="text" id="editUserMatricula" required>
-                </div>
-                <div class="form-group">
-                    <label for="editUserCPF">CPF</label>
-                    <input type="text" id="editUserCPF" required>
-                </div>
-                <div class="form-group">
-                    <label for="editUserLicense">Tipo de Licença</label>
-                    <select id="editUserLicense" required>
-                        <option value="">Selecione...</option>
-                        <option value="Office 365 E1">Office 365 E1</option>
-                        <option value="Office 365 E3">Office 365 E3</option>
-                        <option value="Office 365 F3">Office 365 F3</option>
-                        <option value="Exchange online Kiosk Shared">Exchange online Kiosk Shared</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="editUserStatus">Status</label>
-                    <select id="editUserStatus" required>
-                        <option value="ativo">Ativo</option>
-                        <option value="bloqueado">Bloqueado</option>
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn-secondary" id="cancelEditBtn">Cancelar</button>
-                    <button type="submit" class="btn-primary">Salvar Alterações</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <script>
+        // Variáveis globais para os gráficos
+        let statusChartInstance = null;
+        let licenseChartInstance = null;
 
-    <script src="script.js"></script>
+        // Dados COMPLETOS do SOE Web (apenas alguns para exemplo)
+        const soeUsers = [
+            {
+                nome: "Andrea Corneli Ortis",
+                organizacao: "SEDES",
+                setor: "ASSCOM",
+                matricula: "4821254",
+                prazoOperacao: "14/03/2033",
+                ultimaSessao: "10/09/2025 09:08:02",
+                bloqueado: "",
+                email: "andrea-ortis@social.rs.gov.br;ortis.andrea@gmail.com",
+                cpf: "02214137076",
+                codigoInterno: "664075"
+            },
+            {
+                nome: "Brayan Martins Viana",
+                organizacao: "SEDES",
+                setor: "ASSCOM",
+                matricula: "5079756",
+                prazoOperacao: "02/07/2033",
+                ultimaSessao: "14/07/2025 13:58:39",
+                bloqueado: "",
+                email: "brayan-viana@social.rs.gov.br",
+                cpf: "02429017008",
+                codigoInterno: "978349"
+            },
+            {
+                nome: "Camila Leite Martins",
+                organizacao: "SEDES",
+                setor: "ASSCOM",
+                matricula: "4674111",
+                prazoOperacao: "14/03/2033",
+                ultimaSessao: "08/09/2025 16:19:07",
+                bloqueado: "",
+                email: "camila-martins@social.rs.gov.br",
+                cpf: "01779538022",
+                codigoInterno: "869702"
+            },
+            // Adicione mais usuários aqui conforme necessário
+        ];
+
+        // Dados COMPLETOS do Office 365 (apenas alguns para exemplo)
+        const office365Users = [
+            {
+                conta: "adriana-oliveira@social.rs.gov.br",
+                nome: "Adriana Aparecida de Oliveira",
+                matricula: "3948544",
+                setor: "DAS",
+                licencaMPSA: "Office 365 E3",
+                O365Sku: "ENTERPRISEPACK",
+                tipo_conta: "Usuario"
+            },
+            {
+                conta: "albano-kunrath@social.rs.gov.br",
+                nome: "Albano José Kunrath",
+                matricula: "31778291015",
+                setor: "DIPPE",
+                licencaMPSA: "Office 365 E1",
+                O365Sku: "STANDARDPACK",
+                tipo_conta: "Usuario"
+            },
+            {
+                conta: "alessandra-almeida@social.rs.gov.br",
+                nome: "Alessandra Gois de Almeida",
+                matricula: "444832401",
+                setor: "DAS",
+                licencaMPSA: "Office 365 E3",
+                O365Sku: "ENTERPRISEPACK",
+                tipo_conta: "Usuario"
+            },
+            // Adicione mais usuários aqui conforme necessário
+        ];
+
+        // Função para extrair email principal
+        function extractPrimaryEmail(emailString) {
+            if (!emailString) return '';
+            // Pega o primeiro email se houver múltiplos separados por ;
+            return emailString.split(';')[0].trim().toLowerCase();
+        }
+
+        // Função para normalizar matrícula
+        function normalizeMatricula(matricula) {
+            if (!matricula) return '';
+            return matricula.toString().replace(/\D/g, '');
+        }
+
+        // Função para processar os dados
+        function processData() {
+            const allUsers = [];
+            const userMap = new Map();
+
+            // Processar usuários do SOE Web
+            soeUsers.forEach(user => {
+                const primaryEmail = extractPrimaryEmail(user.email);
+                const normalizedMatricula = normalizeMatricula(user.matricula);
+                
+                const key = primaryEmail || user.nome?.toLowerCase() || normalizedMatricula;
+                
+                if (key) {
+                    userMap.set(key, {
+                        nome: user.nome,
+                        email: primaryEmail,
+                        matricula: normalizedMatricula,
+                        setor: user.setor,
+                        soeWeb: true,
+                        prazoOperacao: user.prazoOperacao,
+                        ultimaSessao: user.ultimaSessao,
+                        bloqueado: user.bloqueado,
+                        cpf: user.cpf,
+                        codigoInterno: user.codigoInterno,
+                        organizacao: user.organizacao
+                    });
+                }
+            });
+
+            // Processar usuários do Office 365
+            office365Users.forEach(user => {
+                const primaryEmail = extractPrimaryEmail(user.conta);
+                const normalizedMatricula = normalizeMatricula(user.matricula);
+                
+                const key = primaryEmail || user.nome?.toLowerCase() || normalizedMatricula;
+                
+                if (key) {
+                    const existingUser = userMap.get(key) || {};
+                    userMap.set(key, {
+                        ...existingUser,
+                        nome: existingUser.nome || user.nome,
+                        email: existingUser.email || primaryEmail,
+                        matricula: existingUser.matricula || normalizedMatricula,
+                        setor: existingUser.setor || user.setor,
+                        office365: true,
+                        licenca: user.licencaMPSA,
+                        tipoConta: user.tipo_conta,
+                        cargo: user.cargo,
+                        O365Sku: user.O365Sku
+                    });
+                }
+            });
+
+            // Converter Map para array
+            userMap.forEach(user => {
+                allUsers.push(user);
+            });
+
+            return allUsers;
+        }
+
+        // Função para atualizar estatísticas
+        function updateStats(users) {
+            const total = users.length;
+            const both = users.filter(u => u.soeWeb && u.office365).length;
+            const onlySoe = users.filter(u => u.soeWeb && !u.office365).length;
+            const onlyOffice = users.filter(u => !u.soeWeb && u.office365).length;
+
+            document.getElementById('totalUsers').textContent = total;
+            document.getElementById('bothSystems').textContent = both;
+            document.getElementById('onlySoe').textContent = onlySoe;
+            document.getElementById('onlyOffice').textContent = onlyOffice;
+            document.getElementById('userCount').textContent = `${total} usuários`;
+
+            // Atualizar gráficos
+            updateCharts(both, onlySoe, onlyOffice, users);
+        }
+
+        // Função para atualizar gráficos (CORRIGIDA)
+        function updateCharts(both, onlySoe, onlyOffice, users) {
+            // Gráfico de status
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            
+            // Destruir gráfico anterior se existir
+            if (statusChartInstance) {
+                statusChartInstance.destroy();
+            }
+            
+            statusChartInstance = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Em Ambos', 'Apenas SOE', 'Apenas Office 365'],
+                    datasets: [{
+                        data: [both, onlySoe, onlyOffice],
+                        backgroundColor: ['#28a745', '#ffc107', '#17a2b8']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Gráfico de licenças
+            const licenseCounts = {};
+            users.forEach(user => {
+                if (user.licenca) {
+                    licenseCounts[user.licenca] = (licenseCounts[user.licenca] || 0) + 1;
+                }
+            });
+
+            const licenseCtx = document.getElementById('licenseChart').getContext('2d');
+            
+            // Destruir gráfico anterior se existir
+            if (licenseChartInstance) {
+                licenseChartInstance.destroy();
+            }
+            
+            // Se não há licenças, mostrar mensagem
+            if (Object.keys(licenseCounts).length === 0) {
+                licenseChartInstance = new Chart(licenseCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Sem dados'],
+                        datasets: [{
+                            label: 'Licenças',
+                            data: [0],
+                            backgroundColor: '#6c757d'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            } else {
+                licenseChartInstance = new Chart(licenseCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(licenseCounts),
+                        datasets: [{
+                            label: 'Quantidade',
+                            data: Object.values(licenseCounts),
+                            backgroundColor: '#007bff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Função para renderizar tabela
+        function renderTable(users) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+
+            if (users.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="8" class="text-center text-muted">Nenhum usuário encontrado</td>`;
+                tbody.appendChild(row);
+                return;
+            }
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                
+                // Determinar status e classe
+                let status = '';
+                let statusClass = '';
+                if (user.soeWeb && user.office365) {
+                    status = 'Em Ambos';
+                    statusClass = 'success';
+                } else if (user.soeWeb) {
+                    status = 'Apenas SOE';
+                    statusClass = 'warning';
+                } else if (user.office365) {
+                    status = 'Apenas Office';
+                    statusClass = 'info';
+                }
+
+                row.innerHTML = `
+                    <td>${user.nome || 'N/A'}</td>
+                    <td>${user.email || 'N/A'}</td>
+                    <td>${user.matricula || 'N/A'}</td>
+                    <td>${user.setor || 'N/A'}</td>
+                    <td>
+                        <span class="badge bg-${user.soeWeb ? 'success' : 'secondary'}">
+                            ${user.soeWeb ? '✓' : '✗'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-${user.office365 ? 'success' : 'secondary'}">
+                            ${user.office365 ? '✓' : '✗'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark">
+                            ${user.licenca || 'N/A'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-${statusClass}">${status}</span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Função para atualizar filtros
+        function updateFilters(users) {
+            const setores = new Set();
+            const licencas = new Set();
+
+            users.forEach(user => {
+                if (user.setor) setores.add(user.setor);
+                if (user.licenca) licencas.add(user.licenca);
+            });
+
+            // Atualizar filtro de setores
+            const setorFilter = document.getElementById('setorFilter');
+            // Limpar opções existentes (exceto a primeira)
+            while (setorFilter.children.length > 1) {
+                setorFilter.removeChild(setorFilter.lastChild);
+            }
+            
+            setores.forEach(setor => {
+                const option = document.createElement('option');
+                option.value = setor;
+                option.textContent = setor;
+                setorFilter.appendChild(option);
+            });
+
+            // Atualizar filtro de licenças
+            const licenseFilter = document.getElementById('licenseFilter');
+            // Limpar opções existentes (exceto a primeira)
+            while (licenseFilter.children.length > 1) {
+                licenseFilter.removeChild(licenseFilter.lastChild);
+            }
+            
+            licencas.forEach(licenca => {
+                const option = document.createElement('option');
+                option.value = licenca;
+                option.textContent = licenca;
+                licenseFilter.appendChild(option);
+            });
+        }
+
+        // Função para aplicar filtros
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const setorFilter = document.getElementById('setorFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const licenseFilter = document.getElementById('licenseFilter').value;
+
+            const filteredUsers = window.allUsers.filter(user => {
+                // Filtro de pesquisa
+                const matchesSearch = !searchTerm || 
+                    (user.nome && user.nome.toLowerCase().includes(searchTerm)) ||
+                    (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+                    (user.matricula && user.matricula.includes(searchTerm));
+
+                // Filtro de setor
+                const matchesSetor = !setorFilter || user.setor === setorFilter;
+
+                // Filtro de status
+                let matchesStatus = true;
+                if (statusFilter === 'both') {
+                    matchesStatus = user.soeWeb && user.office365;
+                } else if (statusFilter === 'soe_only') {
+                    matchesStatus = user.soeWeb && !user.office365;
+                } else if (statusFilter === 'office_only') {
+                    matchesStatus = !user.soeWeb && user.office365;
+                }
+
+                // Filtro de licença
+                const matchesLicense = !licenseFilter || user.licenca === licenseFilter;
+
+                return matchesSearch && matchesSetor && matchesStatus && matchesLicense;
+            });
+
+            renderTable(filteredUsers);
+            updateStats(filteredUsers);
+        }
+
+        // Função para exportar dados
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            const users = window.allUsers || [];
+            
+            if (users.length === 0) {
+                alert('Nenhum dado para exportar!');
+                return;
+            }
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Nome,Email,Matrícula,Setor,SOE Web,Office 365,Licença,Status\n";
+
+            users.forEach(user => {
+                const status = user.soeWeb && user.office365 ? 'Em Ambos' : 
+                             user.soeWeb ? 'Apenas SOE' : 
+                             user.office365 ? 'Apenas Office 365' : 'N/A';
+                
+                const row = [
+                    `"${user.nome || ''}"`,
+                    `"${user.email || ''}"`,
+                    `"${user.matricula || ''}"`,
+                    `"${user.setor || ''}"`,
+                    user.soeWeb ? 'Sim' : 'Não',
+                    user.office365 ? 'Sim' : 'Não',
+                    `"${user.licenca || ''}"`,
+                    `"${status}"`
+                ].join(',');
+                
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "usuarios_sedes.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // Função para atualizar alertas de atenção
+        function updateAttentionAlerts(users) {
+            const onlySoeUsers = users.filter(u => u.soeWeb && !u.office365);
+            const onlyOfficeUsers = users.filter(u => !u.soeWeb && u.office365);
+            
+            if (onlySoeUsers.length > 0 || onlyOfficeUsers.length > 0) {
+                let alertContent = '';
+                
+                if (onlySoeUsers.length > 0) {
+                    alertContent += `<strong>${onlySoeUsers.length} usuários</strong> estão apenas no SOE Web e não no Office 365.<br>`;
+                }
+                
+                if (onlyOfficeUsers.length > 0) {
+                    alertContent += `<strong>${onlyOfficeUsers.length} usuários</strong> estão apenas no Office 365 e não no SOE Web.`;
+                }
+                
+                document.getElementById('attentionContent').innerHTML = alertContent;
+                document.getElementById('attentionAlerts').style.display = 'block';
+            } else {
+                document.getElementById('attentionAlerts').style.display = 'none';
+            }
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Esconder loading e mostrar tabela
+            setTimeout(() => {
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('tableContainer').style.display = 'block';
+                
+                // Processar dados
+                window.allUsers = processData();
+                
+                // Atualizar interface
+                updateStats(window.allUsers);
+                renderTable(window.allUsers);
+                updateFilters(window.allUsers);
+                updateAttentionAlerts(window.allUsers);
+                
+                // Event listeners para filtros
+                document.getElementById('searchInput').addEventListener('input', applyFilters);
+                document.getElementById('setorFilter').addEventListener('change', applyFilters);
+                document.getElementById('statusFilter').addEventListener('change', applyFilters);
+                document.getElementById('licenseFilter').addEventListener('change', applyFilters);
+            }, 1000);
+        });
+    </script>
 </body>
 </html>
