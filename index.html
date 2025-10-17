@@ -1019,4 +1019,352 @@
                     setor: user.setor,
                     matricula: user.matricula,
                     office365: user.tipoLicenca,
-                    soeweb: soew
+                    soeweb: soewebUser ? (soewebUser.bloqueado ? 'Bloqueado' : 'Ativo') : 'Não cadastrado'
+                });
+            });
+            
+            // Adicionar usuários do SoeWeb que não estão no Office 365
+            soewebData.forEach(user => {
+                const existingUser = allUsers.find(au => 
+                    au.email === user.email || 
+                    au.nome === user.nome || 
+                    au.matricula === user.matricula
+                );
+                
+                if (!existingUser) {
+                    allUsers.push({
+                        nome: user.nome,
+                        email: user.email,
+                        setor: user.setor,
+                        matricula: user.matricula,
+                        office365: 'Não cadastrado',
+                        soeweb: user.bloqueado ? 'Bloqueado' : 'Ativo'
+                    });
+                }
+            });
+            
+            const startIndex = (currentComparisonPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedData = allUsers.slice(startIndex, endIndex);
+            
+            // Preencher tabela
+            paginatedData.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.nome}</td>
+                    <td>${user.email}</td>
+                    <td>${user.setor}</td>
+                    <td>${user.matricula}</td>
+                    <td>${user.office365}</td>
+                    <td>${user.soeweb}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn btn-export" data-user-id="${user.email}" title="Ficha de Usuário">
+                                <i class="fas fa-file-export"></i> Ficha
+                            </button>
+                            <button class="action-btn btn-edit" data-user-id="${user.email}" title="Editar Usuário">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Atualizar paginação
+            updatePagination('comparisonPagination', allUsers.length, currentComparisonPage, 'comparison');
+        }
+
+        // Atualizar paginação
+        function updatePagination(paginationId, totalItems, currentPage, tableType) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const paginationContainer = document.getElementById(paginationId);
+            paginationContainer.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // Botão anterior
+            const prevButton = document.createElement('button');
+            prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (tableType === 'office365') {
+                    currentOffice365Page--;
+                    populateOffice365Table(office365Data);
+                } else if (tableType === 'soeweb') {
+                    currentSoeWebPage--;
+                    populateSoeWebTable(soewebData);
+                } else {
+                    currentComparisonPage--;
+                    populateComparisonTable();
+                }
+            });
+            paginationContainer.appendChild(prevButton);
+            
+            // Números das páginas
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                pageButton.classList.toggle('active', i === currentPage);
+                pageButton.addEventListener('click', () => {
+                    if (tableType === 'office365') {
+                        currentOffice365Page = i;
+                        populateOffice365Table(office365Data);
+                    } else if (tableType === 'soeweb') {
+                        currentSoeWebPage = i;
+                        populateSoeWebTable(soewebData);
+                    } else {
+                        currentComparisonPage = i;
+                        populateComparisonTable();
+                    }
+                });
+                paginationContainer.appendChild(pageButton);
+            }
+            
+            // Botão próximo
+            const nextButton = document.createElement('button');
+            nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', () => {
+                if (tableType === 'office365') {
+                    currentOffice365Page++;
+                    populateOffice365Table(office365Data);
+                } else if (tableType === 'soeweb') {
+                    currentSoeWebPage++;
+                    populateSoeWebTable(soewebData);
+                } else {
+                    currentComparisonPage++;
+                    populateComparisonTable();
+                }
+            });
+            paginationContainer.appendChild(nextButton);
+        }
+
+        // Configurar eventos
+        function setupEventListeners() {
+            // Tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    document.getElementById(`${this.dataset.tab}Tab`).classList.add('active');
+                });
+            });
+            
+            // Pesquisa
+            document.getElementById('searchBtn').addEventListener('click', performSearch);
+            document.getElementById('clearBtn').addEventListener('click', clearSearch);
+            
+            // Modal novo usuário
+            document.getElementById('newUserBtn').addEventListener('click', () => {
+                document.getElementById('newUserModal').style.display = 'flex';
+            });
+            
+            document.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        modal.style.display = 'none';
+                    });
+                });
+            });
+            
+            document.getElementById('cancelUserBtn').addEventListener('click', () => {
+                document.getElementById('newUserModal').style.display = 'none';
+            });
+            
+            document.getElementById('newUserForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                // Aqui seria a lógica para salvar o novo usuário
+                alert('Usuário cadastrado com sucesso!');
+                document.getElementById('newUserModal').style.display = 'none';
+                this.reset();
+            });
+            
+            // Botões de detalhes do usuário
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('btn-export') || e.target.closest('.btn-export')) {
+                    const userId = e.target.closest('.btn-export').dataset.userId;
+                    showUserDetails(userId);
+                }
+                
+                if (e.target.classList.contains('btn-edit') || e.target.closest('.btn-edit')) {
+                    const userId = e.target.closest('.btn-edit').dataset.userId;
+                    editUser(userId);
+                }
+            });
+            
+            document.getElementById('closeDetailBtn').addEventListener('click', () => {
+                document.getElementById('userDetailModal').style.display = 'none';
+            });
+            
+            document.getElementById('exportUserBtn').addEventListener('click', exportUserDetails);
+            
+            document.getElementById('editUserBtn').addEventListener('click', function() {
+                const userId = this.dataset.userId;
+                editUser(userId);
+            });
+        }
+
+        // Realizar pesquisa
+        function performSearch() {
+            const name = document.getElementById('searchName').value.toLowerCase();
+            const setor = document.getElementById('searchSetor').value;
+            const cpf = document.getElementById('searchCPF').value;
+            const matricula = document.getElementById('searchMatricula').value;
+            
+            // Filtrar dados do Office 365
+            const filteredOffice365 = office365Data.filter(user => {
+                return (
+                    (name === '' || user.nome.toLowerCase().includes(name)) &&
+                    (setor === '' || user.setor === setor) &&
+                    (cpf === '' || user.cpf.includes(cpf)) &&
+                    (matricula === '' || user.matricula.includes(matricula))
+                );
+            });
+            
+            // Filtrar dados do SoeWeb
+            const filteredSoeWeb = soewebData.filter(user => {
+                return (
+                    (name === '' || user.nome.toLowerCase().includes(name)) &&
+                    (setor === '' || user.setor === setor) &&
+                    (cpf === '' || user.cpf.includes(cpf)) &&
+                    (matricula === '' || user.matricula.includes(matricula))
+                );
+            });
+            
+            // Atualizar tabelas
+            currentOffice365Page = 1;
+            currentSoeWebPage = 1;
+            currentComparisonPage = 1;
+            
+            populateOffice365Table(filteredOffice365);
+            populateSoeWebTable(filteredSoeWeb);
+            populateComparisonTable();
+        }
+
+        // Limpar pesquisa
+        function clearSearch() {
+            document.getElementById('searchForm').reset();
+            currentOffice365Page = 1;
+            currentSoeWebPage = 1;
+            currentComparisonPage = 1;
+            populateTables();
+        }
+
+        // Mostrar detalhes do usuário
+        function showUserDetails(userId) {
+            // Encontrar usuário nos dados
+            let user = office365Data.find(u => u.email === userId);
+            let userType = 'Office 365';
+            
+            if (!user) {
+                user = soewebData.find(u => u.email.includes(userId));
+                userType = 'SoeWeb';
+            }
+            
+            if (user) {
+                const detailsContainer = document.getElementById('userDetails');
+                detailsContainer.innerHTML = '';
+                
+                // Adicionar detalhes com base no tipo de usuário
+                if (userType === 'Office 365') {
+                    detailsContainer.innerHTML = `
+                        <div class="detail-item">
+                            <div class="detail-label">Nome</div>
+                            <div class="detail-value">${user.nome}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">E-mail</div>
+                            <div class="detail-value">${user.email}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Setor</div>
+                            <div class="detail-value">${user.setor}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Matrícula</div>
+                            <div class="detail-value">${user.matricula}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Tipo de Licença</div>
+                            <div class="detail-value">${user.tipoLicenca}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Descrição</div>
+                            <div class="detail-value">${user.descricao}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Tipo de Conta</div>
+                            <div class="detail-value">${user.tipoConta}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">SKU</div>
+                            <div class="detail-value">${user.sku}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Cidade</div>
+                            <div class="detail-value">${user.cidade}</div>
+                        </div>
+                    `;
+                } else {
+                    detailsContainer.innerHTML = `
+                        <div class="detail-item">
+                            <div class="detail-label">Nome</div>
+                            <div class="detail-value">${user.nome}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">E-mail</div>
+                            <div class="detail-value">${user.email}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Setor</div>
+                            <div class="detail-value">${user.setor}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Matrícula</div>
+                            <div class="detail-value">${user.matricula}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">CPF</div>
+                            <div class="detail-value">${user.cpf}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Prazo de Operação</div>
+                            <div class="detail-value">${user.prazoOperacao}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Última Sessão</div>
+                            <div class="detail-value">${user.ultimaSessao}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value ${user.bloqueado ? 'blocked' : ''}">${user.bloqueado ? 'Bloqueado' : 'Ativo'}</div>
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('userDetailModal').style.display = 'flex';
+                document.getElementById('exportUserBtn').dataset.userId = userId;
+                document.getElementById('editUserBtn').dataset.userId = userId;
+            }
+        }
+
+        // Editar usuário
+        function editUser(userId) {
+            alert(`Editando usuário: ${userId}`);
+            // Aqui seria a lógica para editar o usuário
+            // Por enquanto, apenas fechamos o modal de detalhes
+            document.getElementById('userDetailModal').style.display = 'none';
+        }
+
+        // Exportar ficha do usuário
+        function exportUserDetails() {
+            const userId = document.getElementById('exportUserBtn').dataset.userId;
+            alert(`Exportando ficha do usuário: ${userId}`);
+            // Aqui seria a lógica para exportar os dados do usuário
+        }
+    </script>
+</body>
+</html>
