@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Gerenciamento de Usuários</title>
+    <title>Dashboard - Gerenciamento de Usuários SEDES</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -38,6 +38,9 @@
         .stats-number {
             font-size: 2rem;
             font-weight: bold;
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.075);
         }
     </style>
 </head>
@@ -190,55 +193,141 @@
     </div>
 
     <script>
-        // Dados dos sistemas
+        // Dados do SOE Web (baseado no arquivo enviado)
         const soeUsers = [
-            // Dados do SOE Web serão carregados aqui
+            {
+                nome: "Andrea Corneli Ortis",
+                organizacao: "SEDES",
+                setor: "ASSCOM",
+                matricula: "4821254",
+                prazoOperacao: "14/03/2033",
+                ultimaSessao: "10/09/2025 09:08:02",
+                bloqueado: "",
+                email: "andrea-ortis@social.rs.gov.br;ortis.andrea@gmail.com",
+                cpf: "02214137076",
+                codigoInterno: "664075"
+            },
+            {
+                nome: "Brayan Martins Viana",
+                organizacao: "SEDES",
+                setor: "ASSCOM",
+                matricula: "5079756",
+                prazoOperacao: "02/07/2033",
+                ultimaSessao: "14/07/2025 13:58:39",
+                bloqueado: "",
+                email: "brayan-viana@social.rs.gov.br",
+                cpf: "02429017008",
+                codigoInterno: "978349"
+            },
+            {
+                nome: "Camila Leite Martins",
+                organizacao: "SEDES",
+                setor: "ASSCOM",
+                matricula: "4674111",
+                prazoOperacao: "14/03/2033",
+                ultimaSessao: "08/09/2025 16:19:07",
+                bloqueado: "",
+                email: "camila-martins@social.rs.gov.br",
+                cpf: "01779538022",
+                codigoInterno: "869702"
+            },
+            // Adicione mais usuários conforme necessário do arquivo SOE
         ];
 
+        // Dados do Office 365 (baseado no arquivo enviado)
         const office365Users = [
-            // Dados do Office 365 serão carregados aqui
+            {
+                conta: "adriana-oliveira@social.rs.gov.br",
+                nome: "Adriana Aparecida de Oliveira",
+                matricula: "3948544",
+                setor: "DAS",
+                licencaMPSA: "Office 365 E3",
+                O365Sku: "ENTERPRISEPACK",
+                tipo_conta: "Usuario"
+            },
+            {
+                conta: "albano-kunrath@social.rs.gov.br",
+                nome: "Albano José Kunrath",
+                matricula: "31778291015",
+                setor: "DIPPE",
+                licencaMPSA: "Office 365 E1",
+                O365Sku: "STANDARDPACK",
+                tipo_conta: "Usuario"
+            },
+            {
+                conta: "alessandra-almeida@social.rs.gov.br",
+                nome: "Alessandra Gois de Almeida",
+                matricula: "444832401",
+                setor: "DAS",
+                licencaMPSA: "Office 365 E3",
+                O365Sku: "ENTERPRISEPACK",
+                tipo_conta: "Usuario"
+            },
+            // Adicione mais usuários conforme necessário do arquivo Office 365
         ];
+
+        // Função para extrair email principal
+        function extractPrimaryEmail(emailString) {
+            if (!emailString) return '';
+            // Pega o primeiro email se houver múltiplos separados por ;
+            return emailString.split(';')[0].trim().toLowerCase();
+        }
+
+        // Função para normalizar matrícula
+        function normalizeMatricula(matricula) {
+            if (!matricula) return '';
+            return matricula.toString().replace(/\D/g, '');
+        }
 
         // Função para processar os dados
         function processData() {
-            // Combinar dados dos dois sistemas
             const allUsers = [];
             const userMap = new Map();
 
             // Processar usuários do SOE Web
             soeUsers.forEach(user => {
-                const key = user.email?.toLowerCase() || user.nome?.toLowerCase();
+                const primaryEmail = extractPrimaryEmail(user.email);
+                const normalizedMatricula = normalizeMatricula(user.matricula);
+                
+                const key = primaryEmail || user.nome?.toLowerCase() || normalizedMatricula;
+                
                 if (key) {
                     userMap.set(key, {
-                        ...userMap.get(key),
                         nome: user.nome,
-                        email: user.email,
-                        matricula: user.matricula,
+                        email: primaryEmail,
+                        matricula: normalizedMatricula,
                         setor: user.setor,
                         soeWeb: true,
                         prazoOperacao: user.prazoOperacao,
                         ultimaSessao: user.ultimaSessao,
                         bloqueado: user.bloqueado,
-                        cpf: user.cpf
+                        cpf: user.cpf,
+                        codigoInterno: user.codigoInterno,
+                        organizacao: user.organizacao
                     });
                 }
             });
 
             // Processar usuários do Office 365
             office365Users.forEach(user => {
-                const key = user.conta?.toLowerCase() || user.nome?.toLowerCase();
+                const primaryEmail = extractPrimaryEmail(user.conta);
+                const normalizedMatricula = normalizeMatricula(user.matricula);
+                
+                const key = primaryEmail || user.nome?.toLowerCase() || normalizedMatricula;
+                
                 if (key) {
                     const existingUser = userMap.get(key) || {};
                     userMap.set(key, {
                         ...existingUser,
                         nome: existingUser.nome || user.nome,
-                        email: existingUser.email || user.conta,
-                        matricula: existingUser.matricula || user.matricula,
+                        email: existingUser.email || primaryEmail,
+                        matricula: existingUser.matricula || normalizedMatricula,
                         setor: existingUser.setor || user.setor,
                         office365: true,
                         licenca: user.licencaMPSA,
                         tipoConta: user.tipo_conta,
-                        cargo: user.cargo
+                        cargo: user.cargo,
+                        O365Sku: user.O365Sku
                     });
                 }
             });
@@ -265,14 +354,17 @@
             document.getElementById('userCount').textContent = `${total} usuários`;
 
             // Atualizar gráficos
-            updateCharts(both, onlySoe, onlyOffice);
+            updateCharts(both, onlySoe, onlyOffice, users);
         }
 
         // Função para atualizar gráficos
-        function updateCharts(both, onlySoe, onlyOffice) {
+        function updateCharts(both, onlySoe, onlyOffice, users) {
             // Gráfico de status
             const statusCtx = document.getElementById('statusChart').getContext('2d');
-            new Chart(statusCtx, {
+            if (window.statusChartInstance) {
+                window.statusChartInstance.destroy();
+            }
+            window.statusChartInstance = new Chart(statusCtx, {
                 type: 'doughnut',
                 data: {
                     labels: ['Em Ambos', 'Apenas SOE', 'Apenas Office 365'],
@@ -288,8 +380,37 @@
             });
 
             // Gráfico de licenças
+            const licenseCounts = {};
+            users.forEach(user => {
+                if (user.licenca) {
+                    licenseCounts[user.licenca] = (licenseCounts[user.licenca] || 0) + 1;
+                }
+            });
+
             const licenseCtx = document.getElementById('licenseChart').getContext('2d');
-            // Contar licenças (será implementado após processamento dos dados)
+            if (window.licenseChartInstance) {
+                window.licenseChartInstance.destroy();
+            }
+            window.licenseChartInstance = new Chart(licenseCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(licenseCounts),
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: Object.values(licenseCounts),
+                        backgroundColor: '#007bff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
         }
 
         // Função para renderizar tabela
@@ -342,32 +463,105 @@
             });
         }
 
-        // Função para exportar dados
-        document.getElementById('exportBtn').addEventListener('click', function() {
-            // Implementar exportação para Excel/CSV
-            alert('Funcionalidade de exportação será implementada!');
-        });
+        // Função para atualizar filtros
+        function updateFilters(users) {
+            const setores = new Set();
+            const licencas = new Set();
+
+            users.forEach(user => {
+                if (user.setor) setores.add(user.setor);
+                if (user.licenca) licencas.add(user.licenca);
+            });
+
+            // Atualizar filtro de setores
+            const setorFilter = document.getElementById('setorFilter');
+            setores.forEach(setor => {
+                const option = document.createElement('option');
+                option.value = setor;
+                option.textContent = setor;
+                setorFilter.appendChild(option);
+            });
+
+            // Atualizar filtro de licenças
+            const licenseFilter = document.getElementById('licenseFilter');
+            licencas.forEach(licenca => {
+                const option = document.createElement('option');
+                option.value = licenca;
+                option.textContent = licenca;
+                licenseFilter.appendChild(option);
+            });
+        }
 
         // Função para aplicar filtros
         function applyFilters() {
-            // Implementar lógica de filtros
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const setorFilter = document.getElementById('setorFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const licenseFilter = document.getElementById('licenseFilter').value;
+
+            const filteredUsers = window.allUsers.filter(user => {
+                // Filtro de pesquisa
+                const matchesSearch = !searchTerm || 
+                    (user.nome && user.nome.toLowerCase().includes(searchTerm)) ||
+                    (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+                    (user.matricula && user.matricula.includes(searchTerm));
+
+                // Filtro de setor
+                const matchesSetor = !setorFilter || user.setor === setorFilter;
+
+                // Filtro de status
+                let matchesStatus = true;
+                if (statusFilter === 'both') {
+                    matchesStatus = user.soeWeb && user.office365;
+                } else if (statusFilter === 'soe_only') {
+                    matchesStatus = user.soeWeb && !user.office365;
+                } else if (statusFilter === 'office_only') {
+                    matchesStatus = !user.soeWeb && user.office365;
+                }
+
+                // Filtro de licença
+                const matchesLicense = !licenseFilter || user.licenca === licenseFilter;
+
+                return matchesSearch && matchesSetor && matchesStatus && matchesLicense;
+            });
+
+            renderTable(filteredUsers);
+            updateStats(filteredUsers);
         }
 
-        // Função para carregar dados dos arquivos
-        function loadDataFromFiles() {
-            // Aqui você implementaria a leitura dos arquivos Excel
-            // Por enquanto, vamos usar dados de exemplo
-            console.log('Carregando dados dos sistemas...');
-            
-            // Simular carregamento
-            setTimeout(() => {
-                // Após carregar os dados:
-                const processedUsers = processData();
-                updateStats(processedUsers);
-                renderTable(processedUsers);
-                updateAttentionAlerts(processedUsers);
-            }, 1000);
-        }
+        // Função para exportar dados
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            const users = window.allUsers || [];
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Nome,Email,Matrícula,Setor,SOE Web,Office 365,Licença,Status\n";
+
+            users.forEach(user => {
+                const status = user.soeWeb && user.office365 ? 'Em Ambos' : 
+                             user.soeWeb ? 'Apenas SOE' : 
+                             user.office365 ? 'Apenas Office 365' : 'N/A';
+                
+                const row = [
+                    `"${user.nome || ''}"`,
+                    `"${user.email || ''}"`,
+                    `"${user.matricula || ''}"`,
+                    `"${user.setor || ''}"`,
+                    user.soeWeb ? 'Sim' : 'Não',
+                    user.office365 ? 'Sim' : 'Não',
+                    `"${user.licenca || ''}"`,
+                    `"${status}"`
+                ].join(',');
+                
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "usuarios_sedes.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
 
         // Função para atualizar alertas de atenção
         function updateAttentionAlerts(users) {
@@ -394,7 +588,14 @@
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
-            loadDataFromFiles();
+            // Processar dados
+            window.allUsers = processData();
+            
+            // Atualizar interface
+            updateStats(window.allUsers);
+            renderTable(window.allUsers);
+            updateFilters(window.allUsers);
+            updateAttentionAlerts(window.allUsers);
             
             // Event listeners para filtros
             document.getElementById('searchInput').addEventListener('input', applyFilters);
